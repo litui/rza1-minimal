@@ -1,163 +1,269 @@
-MEMORY
-{
-  ROM (rx) : ORIGIN = 0x00000000, LENGTH = 0x02000000
-  BOOT_LOADER (rx) : ORIGIN = (0x18000000), LENGTH = (0x00004000)
-  SFLASH (rx) : ORIGIN = (0x18000000 + (0x00004000)), LENGTH = (0x800000 - (0x00004000))
-  L_TTB (rw) : ORIGIN = 0x20000000, LENGTH = 0x00004000
-  RAM (rwx) : ORIGIN = 0x20020000, LENGTH = 0x008E0000
-  RAM_NC (rwx) : ORIGIN = 0x20900000, LENGTH = 0x00100000
+/* Reworking to run on GR-PEACH in boot mode 3 */
+
+MEMORY {
+    ROM          (rx)  : ORIGIN = 0x00000000, LENGTH = 32M
+    BOOT_LOADER  (rx)  : ORIGIN = 0x18000000, LENGTH = 0x04000
+    SFLASH       (rx)  : ORIGIN = 0x18004000, LENGTH = (0x800000 - (0x00004000))
+    SYSTEM_RAM   (rwx) : ORIGIN = 0x20020000, LENGTH = 0x04000
+    STACK        (rw)  : ORIGIN = 0x20024000, LENGTH = 0x14000
+    CACHED_RAM   (rw)  : ORIGIN = 0x20039000, LENGTH = 0x004C7000
+    SDRAM        (rw)  : ORIGIN = 0x08000000, LENGTH = 32M
+    UNCACHED_RAM (rw)  : ORIGIN = 0x60500000, LENGTH = 0x00500000
 }
-ENTRY(Reset_Handler)
+
 SECTIONS
 {
     .boot :
     {
         KEEP(*(.boot_loader))
     } > BOOT_LOADER
-    .text :
-    {
-        Image$$VECTORS$$Base = .;
-        * (RESET)
-        KEEP(*(.isr_vector))
-        *(SVC_TABLE)
-        *(.text*)
-        KEEP(*(.init))
-        KEEP(*(.fini))
-        *crtbegin.o(.ctors)
-        *crtbegin?.o(.ctors)
-        *(EXCLUDE_FILE(*crtend?.o *crtend.o) .ctors)
-        *(SORT(.ctors.*))
-        *(.ctors)
-        *crtbegin.o(.dtors)
-        *crtbegin?.o(.dtors)
-        *(EXCLUDE_FILE(*crtend?.o *crtend.o) .dtors)
-        *(SORT(.dtors.*))
-        *(.dtors)
-        Image$$VECTORS$$Limit = .;
-        Image$$RO_DATA$$Base = .;
-        *(.rodata*)
-        Image$$RO_DATA$$Limit = .;
-        KEEP(*(.eh_frame*))
+    .text : {
+
+        . = 0x00000000;
+        * (VECTOR_TABLE)            /*asm*/
+
+        . = 0x00000200;
+        * (RESET_HANDLER)           /*asm*/
+        * (INIT_TTB)                /*asm*/
+        * (INITCA9CACHE)            /*asm*/
+
+        * (CODE_BASIC_SETUP)
+        */peripheral_init_basic.o (.text .text.*)
+        */bsc.o (.text .text.*)
+        */bsc_userdef.o (.text .text.*)
+
+        * (CONST_BASIC_SETUP)
+        */peripheral_init_basic.o (.rodata .rodata.*)
+        */bsc.o (.rodata .rodata.*)
+        */bsc_userdef.o (.rodata .rodata.*)
+
+        * (CODE_IRQ_HANDLER)        /*asm*/
+
+        * (InRoot$$Sections)
+
+        * (CODE_FPU_INIT)           /*nothing*/
+        * (FPU_INIT)                /*asm*/
+
+        * (CONST_FPU_INIT)          /*nothing*/
+
+        * (CODE_RESET)              /*asm*/
+        */initsect.o (.rodata .rodata.*)
+        */port_init.o (.text .text.*)
+        */stb_init.o (.text .text.*)
+        */resetprg.o (.text .text.*)
+        */l2_cache_init.o (.text .text.*)
+        * (INIT_VBAR)               /*asm*/
+
+        * (CONST_RESET)             /*asm*/
+        */sections.o (.rodata .rodata.*)
+        */port_init.o (.rodata .rodata.*)
+        */stb_init.o (.rodata .rodata.*)
+        */resetprg.o (.rodata .rodata.*)
+        */l2_cache_init.o (.rodata .rodata.*)
     } > SFLASH
-    .ARM.extab :
-    {
-        *(.ARM.extab* .gnu.linkonce.armextab.*)
-    } > SFLASH
-    __exidx_start = .;
-    .ARM.exidx :
-    {
-        *(.ARM.exidx* .gnu.linkonce.armexidx.*)
-    } > SFLASH
-    __exidx_end = .;
-    .copy.table :
-    {
-        . = ALIGN(4);
-        __copy_table_start__ = .;
-        LONG (__etext)
-        LONG (__data_start__)
-        LONG (__data_end__ - __data_start__)
-        LONG (__etext2)
-        LONG (__nc_data_start)
-        LONG (__nc_data_end - __nc_data_start)
-        LONG (LOADADDR(.ram_code))
-        LONG (ADDR(.ram_code))
-        LONG (SIZEOF(.ram_code))
-        __copy_table_end__ = .;
-    } > SFLASH
-    .zero.table :
-    {
-        . = ALIGN(4);
-        __zero_table_start__ = .;
-        LONG (__bss_start__)
-        LONG (__bss_end__ - __bss_start__)
-        LONG (__nc_bss_start)
-        LONG (__nc_bss_end - __nc_bss_start)
-        __zero_table_end__ = .;
-    } > SFLASH
-    .ram_code : ALIGN( 0x4 ) {
-        __ram_code_load = .;
-        __ram_code_start = LOADADDR(.ram_code) + ( __ram_code_load - ADDR(.ram_code) );
-        *(RAM_CODE)
-        *(RAM_CONST)
-        . = ALIGN( 0x4 );
-        __ram_code_end = LOADADDR(.ram_code) + ( . - ADDR(.ram_code) );
-    } > RAM AT > SFLASH
-    Load$$SEC_RAM_CODE$$Base = LOADADDR(.ram_code);
-    Image$$SEC_RAM_CODE$$Base = ADDR(.ram_code);
-    Load$$SEC_RAM_CODE$$Length = SIZEOF(.ram_code);
-    .ttb :
-    {
+
+    /*
+        The vector mirror table and the irq handler must include in the .data section.
+        Because the addresses on ROM are not calculated if the two put in each sections.
+    */
+    .data : {
+        . = 0x00000000;
+        __vect_load  = .;
+        __vect_start = LOADADDR(.data) + ( __vect_load - ADDR(.data) );
+
+        Image$$VECTOR_MIRROR_TABLE$$Base = .;
+        * (VECTOR_MIRROR_TABLE)         /*asm*/
+
+        __vect_end =  LOADADDR(.data) + ( . - ADDR(.data) );
+
+        /********************************************************************/
+
+        . = 0x00000100;
+        __fastcode_load  = .;
+        __fastcode_start = LOADADDR(.data) + ( __fastcode_load - ADDR(.data) );
+
+        * (CODE_HANDLER_JMPTBL)
+        */intc_userdef.o (.text .text.*)
+
+        * (CONST_HANDLER_JMPTBL)
+        */intc_userdef.o (.rodata .rodata.*)
+
+        * (IRQ_FIQ_HANDLER)         /*asm*/
+        * (CODE_HANDLER)
+        */intc_handler.o (.text .text.*)
+
+        * (CONST_HANDLER)
+        */intc_handler.o (.rodata .rodata.*)
+
+        * (CODE_IO_REGRW)
+        */rza_io_regrw.o (.text .text.*)
+
+        * (CONST_IO_REGRW)
+        */rza_io_regrw.o (.rodata .rodata.*)
+
+        __fastcode_end = LOADADDR(.data) + ( . - ADDR(.data) );
+
+        /********************************************************************/
+
+        __data_load  = .;
+        __data_start = LOADADDR(.data) + ( __data_load - ADDR(.data) );
+
+        * (DATA_HANDLER_JMPTBL)
+        */intc_userdef.o (.data)
+
+        * (DATA_BASIC_SETUP)
+        */peripheral_init_basic.o (.data)
+        */bsc.o (.data)
+        */bsc_userdef.o (.data)
+
+        * (DATA_HANDLER)
+        */intc_handler.o (.data)
+
+        * (DATA_FPU_INIT)           /*nothing*/
+
+        * (DATA_RESET)
+        */port_init.o (.data)
+        */stb_init.o (.data)
+        */resetprg.o (.data)
+        */l2_cache_init.o (.data)
+
+        * (DATA_IO_REGRW)
+        */rza_io_regrw.o (.data)
+
+        * (.data .data.*)
+
+        __data_end = LOADADDR(.data) + ( . - ADDR(.data) );
+
+    } > SYSTEM_RAM AT > SFLASH
+    
+    .bss : {
+        __bss_start = .;
+
+        * (BSS_HANDLER_JMPTBL)
+        */intc_userdef.o (.bss)
+
+        * (BSS_BASIC_SETUP)
+        */peripheral_init_basic.o (.bss)
+        */bsc.o (.bss)
+        */bsc_userdef.o (.bss)
+
+        * (BSS_HANDLER)
+        */intc_handler.o (.bss)
+
+        * (BSS_FPU_INIT)            /*nothing*/
+
+        * (BSS_RESET)
+        */port_init.o (.bss)
+        */stb_init.o (.bss)
+        */resetprg.o (.bss)
+        */l2_cache_init.o (.bss)
+
+        * (BSS_IO_REGRW)
+        */rza_io_regrw.o (.bss)
+
+        __bss_end = .;
+    } > CACHED_RAM
+
+
+    .stack : {
+        . = ALIGN( 0x10 );
+        Image$$ARM_LIB_STACK$$ZI$$Base = .;
+        . += 0x00008000;
+        Image$$ARM_LIB_STACK$$ZI$$Limit = .;
+
+        . = ALIGN( 0x10 );
+        Image$$IRQ_STACK$$ZI$$Base = .;
+        . += 0x00002000;
+        Image$$IRQ_STACK$$ZI$$Limit = .;
+
+        . = ALIGN( 0x10 );
+        Image$$FIQ_STACK$$ZI$$Base = .;
+        . += 0x00002000;
+        Image$$FIQ_STACK$$ZI$$Limit = .;
+
+        . = ALIGN( 0x10 );
+        Image$$SVC_STACK$$ZI$$Base = .;
+        . += 0x00002000;
+        Image$$SVC_STACK$$ZI$$Limit = .;
+
+        . = ALIGN( 0x10 );
+        Image$$ABT_STACK$$ZI$$Base = .;
+        . += 0x00002000;
+        Image$$ABT_STACK$$ZI$$Limit = .;
+
+        . = ALIGN( 0x4000 );
         Image$$TTB$$ZI$$Base = .;
         . += 0x00004000;
         Image$$TTB$$ZI$$Limit = .;
-    } > L_TTB
-    __etext = Load$$SEC_RAM_CODE$$Base + SIZEOF(.ram_code);
-    .data : AT (__etext)
-    {
-        Image$$RW_DATA$$Base = .;
-        __data_start__ = .;
-        *(vtable)
-        *(.data*)
-        Image$$RW_DATA$$Limit = .;
-        . = ALIGN(4);
-        PROVIDE (__preinit_array_start = .);
-        KEEP(*(.preinit_array))
-        PROVIDE (__preinit_array_end = .);
-        . = ALIGN(4);
-        PROVIDE (__init_array_start = .);
-        KEEP(*(SORT(.init_array.*)))
-        KEEP(*(.init_array))
-        PROVIDE (__init_array_end = .);
-        . = ALIGN(4);
-        PROVIDE (__fini_array_start = .);
-        KEEP(*(SORT(.fini_array.*)))
-        KEEP(*(.fini_array))
-        PROVIDE (__fini_array_end = .);
-        . = ALIGN(4);
-        __data_end__ = .;
-    } > RAM
-    .bss ALIGN(0x10):
-    {
-        Image$$RW_IRAM1$$Base = .;
-        __bss_start__ = .;
-        *(.bss*)
-        *(COMMON)
-        __bss_end__ = .;
-        Image$$RW_IRAM1$$Limit = .;
-    } > RAM
-    .heap :
-    {
-        __end__ = .;
-        end = __end__;
-        *(.heap*)
-    } > RAM
-    .stack_dummy (COPY):
-    {
-        *(.stack*)
-    } > RAM
-    __StackTop = ORIGIN(RAM) + LENGTH(RAM);
-    _estack = __StackTop;
-    __StackLimit = __StackTop - SIZEOF(.stack_dummy);
-    __HeapLimit = __StackLimit;
-    PROVIDE(__stack = __StackTop);
-    ASSERT(__StackLimit >= __HeapLimit, "region RAM overflowed with stack")
-    __etext2 = __etext + SIZEOF(.data);
-    .nc_data : AT (__etext2)
-    {
-        Image$$RW_DATA_NC$$Base = .;
-        __nc_data_start = .;
-        *(NC_DATA)
-        . = ALIGN(4);
-        __nc_data_end = .;
-        Image$$RW_DATA_NC$$Limit = .;
-    } > RAM_NC
-    .nc_bss (NOLOAD) :
-    {
-        Image$$ZI_DATA_NC$$Base = .;
-        __nc_bss_start = .;
-        *(NC_BSS)
-        . = ALIGN(4);
-        __nc_bss_end = .;
-        Image$$ZI_DATA_NC$$Limit = .;
-    } > RAM_NC
+    } > STACK
+
+    .SDRAM (NOLOAD) : {
+        * (BSS_DMAC_SAMPLE_SDRAM)           /* DMAC sample transfer destination work area */
+    } > SDRAM
+
+    .uncached_RAM (NOLOAD) : {
+        * (BSS_RIIC_SAMPLE)                 /* RIIC sample transfer work area */
+        * (BSS_RSPI_SAMPLE)                 /* RSPI sample transfer work area */
+        * (BSS_SCIF_SYNC_SAMPLE)            /* SCIF_SYNC sample work area */
+        * (BSS_NANDNC)                      /* FLCTL work */
+    } > UNCACHED_RAM
+
+    .uncached_RAM2 : {
+        __cache_operation_load  = .;
+        __cache_operation_start = LOADADDR(.uncached_RAM2) + ( __cache_operation_load - ADDR(.uncached_RAM2) );
+
+        * (L1_CACHE_OPERATION)
+        * (CODE_CACHE_OPERATION)
+        */cache.o (.text .text.*)
+
+        * (CONST_CACHE_OPERATION)
+        */cache.o (.rodata .rodata.*)
+
+        * (DATA_CACHE_OPERATION)
+        */cache.o (.data)
+
+        * (BSS_CACHE_OPERATION)
+        */cache.o (.bss)
+
+        __cache_operation_end = LOADADDR(.uncached_RAM2) + ( . - ADDR(.uncached_RAM2) );
+    } > UNCACHED_RAM AT > SFLASH
+
+    .text2 : {
+        * (.text .text.*)
+        * (.rodata .rodata.*)
+    } > SFLASH
+
+
+    .data2 : {
+        __data2_load  = .;
+        __data2_start = LOADADDR(.data2) + ( __data2_load - ADDR(.data2) );
+
+        * (.data .data.*)
+
+        __data2_end = LOADADDR(.data2) + ( . - ADDR(.data2) );
+    } > CACHED_RAM AT > SFLASH
+
+
+    .bss2 : {
+        __bss2_start = .;
+
+        * (BSS_DMAC_SAMPLE_INTERNAL_RAM)    /* DMAC sample transfer source work area */
+
+        * (.bss .bss.*)
+        * (COMMON)
+
+        __bss2_end = .;
+
+        . = ALIGN( 0x4 );
+
+        end = .;
+        . = . + 0x00080000;
+        stack_ptr = .;
+
+    } > CACHED_RAM
+
+
+    .dummy : {
+        . = 0x0100;
+    } > SFLASH = 0x00
 }

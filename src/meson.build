@@ -7,7 +7,9 @@ core_sources = files(
 core_args = []
 
 firmware_target = get_option('firmware_target')
-if firmware_target == 'native-rza1'
+if firmware_target == 'gr-peach'
+    subdir('native-rza1')
+elif firmware_target == 'gr-lychee'
     subdir('native-rza1')
 endif
 

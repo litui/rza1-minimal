@@ -92,7 +92,7 @@ firmware_target = get_option('firmware_target')
 is_firmware_build = firmware_target != ''
 
 if is_firmware_build
-  base_name = 'main'
+  base_name = 'main_@0@'.format(firmware_target).to_lower().underscorify()
   elf_file = executable(
     f'@base_name@_firmware',
     name_suffix: 'elf',

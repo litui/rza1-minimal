@@ -53,9 +53,8 @@ Variable Externs
 Functions Prototypes
 ******************************************************************************/
 int_t main(void);
+void Sample_OSTM0_Interrupt(uint32_t int_sense);
 
-/* Putting this here so it's declared for assembler */
-void SystemInit(void);
 
 #endif  /* MAIN_H */
 

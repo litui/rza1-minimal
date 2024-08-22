@@ -71,9 +71,6 @@ Exported global variables and functions (to be accessed by other files)
 Private global variables and functions
 ******************************************************************************/
 
-int32_t Sample_OSTM0_Interrupt(void) {
-    return 0;
-}
 
 /******************************************************************************
 * Function Name: Userdef_OSTM0_Init

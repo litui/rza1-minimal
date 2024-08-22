@@ -2,8 +2,9 @@ option(
     'firmware_target',
     type: 'combo',
     choices: [
-        'native-rza1'
+        'gr-lychee',
+        'gr-peach',
     ],
-    value: 'native-rza1',
+    value: 'gr-peach',
     description: 'Target for firmware build.'
 )

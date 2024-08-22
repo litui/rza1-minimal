@@ -21,37 +21,20 @@
 * Copyright (C) 2012 - 2015 Renesas Electronics Corporation. All rights reserved.
 *******************************************************************************/
 /*******************************************************************************
-* File Name   : resetprg.c
-* $Rev: 1330 $
-* $Date:: 2015-02-17 16:07:56 +0900#$
-* Description : Sub Main
+* File Name   : led.c
+* $Rev: 1357 $
+* $Date:: 2015-03-10 16:11:29 +0900#$
+* Description : LED setting
 *******************************************************************************/
 
 
 /******************************************************************************
 Includes   <System Includes> , "Project Includes"
 ******************************************************************************/
-#ifdef __ICCARM__
-#include <intrinsics.h>
-#endif
-#ifdef __GNUC__
-#include "irq.h"
-#endif
 #include "r_typedefs.h"
-#include "devdrv_bsc.h"         /* Common Driver Header */
-#include "devdrv_intc.h"        /* INTC Driver Header   */
-#include "resetprg.h"
-#include "cache.h"
-#include "sio_char.h"
-#include "stb_init.h"
-#include "port_init.h"
-
-#ifdef __CC_ARM
-#pragma arm section code   = "CODE_RESET"
-#pragma arm section rodata = "CONST_RESET"
-#pragma arm section rwdata = "DATA_RESET"
-#pragma arm section zidata = "BSS_RESET"
-#endif
+#include "led.h"
+#include "iodefine.h"
+#include "rza_io_regrw.h"
 
 /******************************************************************************
 Typedef definitions
@@ -61,9 +44,6 @@ Typedef definitions
 /******************************************************************************
 Macro definitions
 ******************************************************************************/
-#ifdef __CC_ARM
-#define SystemInit  $Sub$$main
-#endif
 
 
 /******************************************************************************
@@ -82,56 +62,52 @@ Private global variables and functions
 
 
 /*******************************************************************************
-* Function Name: SystemInit
-* Description  : Executes initial setting for the peripheral functions, and 
-*              : jumps to the main function by calling the $Super$$main of the 
-*              : library function. In this sample code, initial settings for the
-*              : STB, PORT, INTC, and L1 cache are executed, and the vector 
-*              : base address is set to the on-chip RAM area. The IRQ and the
-*              : FIQ interrupts are enabled by calling the __enable_irq and 
-*              : __enable_fiq of the library function.
+* Function Name: led_init
+* Description  : Executes initial setting for the PORT which is connected to  
+*              : the LEDs on the CPU board.
 * Arguments    : none
 * Return Value : none
 *******************************************************************************/
-void SystemInit(void)
+void LedInit(void)
 {
-    /* ==== Start clock supply of the peripheral functions ==== */
-    STB_Init();
+    /* ---- P7_1 : LED1 ---- */
+    /* Port initialize */
+    RZA_IO_RegWrite_16(&GPIO.PIBC7, 0, GPIO_PIBC7_PIBC71_SHIFT, GPIO_PIBC7_PIBC71);
+    RZA_IO_RegWrite_16(&GPIO.PBDC7, 0, GPIO_PBDC7_PBDC71_SHIFT, GPIO_PBDC7_PBDC71);
+    RZA_IO_RegWrite_16(&GPIO.PM7,   1, GPIO_PM7_PM71_SHIFT,     GPIO_PM7_PM71);
+    RZA_IO_RegWrite_16(&GPIO.PMC7,  0, GPIO_PMC7_PMC71_SHIFT,   GPIO_PMC7_PMC71);
+    RZA_IO_RegWrite_16(&GPIO.PIPC7, 0, GPIO_PIPC7_PIPC71_SHIFT, GPIO_PIPC7_PIPC71);
 
-    /* ==== PORT setting ==== */
-    PORT_Init();
+    /* Mode : Port mode                          */
+    /* Terminal output level : High level output */
+    /* Port mode : Output mode                   */
+    RZA_IO_RegWrite_16(&GPIO.PBDC7, 0, GPIO_PBDC7_PBDC71_SHIFT, GPIO_PBDC7_PBDC71);
+    RZA_IO_RegWrite_16(&GPIO.P7,    1, GPIO_P7_P71_SHIFT,       GPIO_P7_P71);
+    RZA_IO_RegWrite_16(&GPIO.PM7,   0, GPIO_PM7_PM71_SHIFT,     GPIO_PM7_PM71);
+}
 
-    /* ==== BSC setting ==== */
-    /* Initialize the CS2 and the CS3 spaces */
-    R_BSC_Init((uint8_t)BSC_AREA_CS3);
-    R_BSC_Init((uint8_t)BSC_AREA_CS2);
+/*******************************************************************************
+* Function Name: led_on
+* Description  : Turns on the LEDs on the CPU board.
+* Arguments    : none
+* Return Value : none
+*******************************************************************************/
+void LedOn(void)
+{
+    RZA_IO_RegWrite_16(&GPIO.P7, 0, GPIO_P7_P71_SHIFT, GPIO_P7_P71);
+}
 
-    /* ==== INTC setting ==== */
-    R_INTC_Init();
-
-    /* ==== Initial setting of the level 2 cache ==== */
-    L2CacheInit();
-
-    /* ==== Initial setting of the level 1 cache ==== */
-    L1CacheInit();
-
-    /* ==== Vector base address setting ==== */
-    VbarInit();
-
-    __enable_irq();         /* Enable IRQ interrupt */
-    __enable_fiq();         /* Enable FIQ interrupt */
-
-    /* ==== Initialize Terminal ==== */
-    /* SCIF 2ch */
-    /* P1 clock=66.67MHz CKS=0 SCBRR=17 Bit rate error=0.46% => Baud rate=115200bps */
-    IoInitScif2();
-
-#ifdef __CC_ARM
-    /* ==== Function call of main function ==== */
-    $Super$$main();
-#endif
+/*******************************************************************************
+* Function Name: led_off
+* Description  : Turns off the LEDs on the CPU board.
+* Arguments    : none
+* Return Value : none
+*******************************************************************************/
+void LedOff(void)
+{
+    RZA_IO_RegWrite_16(&GPIO.P7, 1, GPIO_P7_P71_SHIFT, GPIO_P7_P71);
 }
 
 
-/* END of File */
+/* End of File */
 

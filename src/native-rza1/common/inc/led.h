@@ -21,13 +21,13 @@
 * Copyright (C) 2012 - 2015 Renesas Electronics Corporation. All rights reserved.
 *******************************************************************************/
 /******************************************************************************
-* File Name    : devdrv_ostm.h
+* File Name    : led.h
 * $Rev: 1330 $
 * $Date:: 2015-02-17 16:07:56 +0900#$
-* Description  : OS timer driver header
+* Description  : Led setting header
 ******************************************************************************/
-#ifndef DEVDRV_OSTM_H
-#define DEVDRV_OSTM_H
+#ifndef LED_H
+#define LED_H
 
 /******************************************************************************
 Includes   <System Includes> , "Project Includes"
@@ -42,9 +42,7 @@ Typedef definitions
 /******************************************************************************
 Macro definitions
 ******************************************************************************/
-/* ==== OSTM H/W specification ==== */
-#define OSTM_MODE_INTERVAL  (0)     /* OSTM operating mode : Interval timer mode       */
-#define OSTM_MODE_COMPARE   (1)     /* OSTM operating mode : Free running compare mode */
+
 
 /******************************************************************************
 Variable Externs
@@ -54,16 +52,11 @@ Variable Externs
 /******************************************************************************
 Functions Prototypes
 ******************************************************************************/
-/* ==== API functions ==== */
-int32_t R_OSTM_Init(uint32_t channel, uint32_t mode, uint32_t cycle);
-int32_t R_OSTM_Open(uint32_t channel);
-int32_t R_OSTM_Close(uint32_t channel, uint32_t * count);
-
-/* ==== User-defined functions ==== */
-int32_t Userdef_OSTM0_Init(uint32_t mode, uint32_t cycle);
-int32_t Userdef_OSTM1_Init(uint32_t mode, uint32_t cycle);
+void LedInit(void);
+void LedOn(void);
+void LedOff(void);
 
 
-#endif  /* DEVDRV_OSTM_H */
+#endif  /* LED_H */
 
 /* End of File */
