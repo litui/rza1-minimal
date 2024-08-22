@@ -1,0 +1,9 @@
+option(
+    'firmware_target',
+    type: 'combo',
+    choices: [
+        'native-rza1'
+    ],
+    value: 'native-rza1',
+    description: 'Target for firmware build.'
+)
