@@ -3,7 +3,7 @@ project('rza1-minimal', 'c',
   default_options : [
     'warning_level=2',
     'c_std=c11',
-    'optimization=s',
+    # 'optimization=s',
     'debug=true',
     'werror=false'
   ]
@@ -79,6 +79,8 @@ add_project_arguments(
 	language: 'c',
 )
 
+subdir('src')
+
 add_project_link_arguments('-Wl,--print-memory-usage', language: 'c')
 
 # System binary utilities
@@ -90,10 +92,11 @@ firmware_target = get_option('firmware_target')
 is_firmware_build = firmware_target != ''
 
 if is_firmware_build
-  base_name = 'rza1-minimal'
+  base_name = 'main'
   elf_file = executable(
     f'@base_name@_firmware',
     name_suffix: 'elf',
+    dependencies: [core, native_rza1]
   )
   alias_target('elf', elf_file)
 
