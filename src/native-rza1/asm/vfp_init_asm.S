@@ -35,6 +35,7 @@
     .arm
 
     .global  Enable_VFP
+    .type    Enable_VFP,%function
 
 Enable_VFP:  @FUNCTION {}
 @;

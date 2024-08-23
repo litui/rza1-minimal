@@ -53,7 +53,9 @@
 @    IMPORT  INTC_Handler_Interrupt
 
     .global  irq_handler
+    .type    irq_handler,%function
     .global  fiq_handler
+    .type    fiq_handler,%function
 
 
 @******************************************************************************

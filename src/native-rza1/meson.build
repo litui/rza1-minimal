@@ -4,8 +4,10 @@ native_rza1_includes = include_directories(
     'common/inc',
     'common/src/drivers/bsc/inc',
     'common/src/drivers/intc/inc',
+    'common/src/drivers/ostm/inc',
     'common/src/drivers/scif_uart/inc',
     'common',
+    'RTT',
     '.',
 )
 
@@ -30,9 +32,14 @@ native_rza1_generic_sources = files(
     'common/src/drivers/intc/intc_driver/intc.c',
     'common/src/drivers/intc/intc_driver/intc_handler.c',
     'common/src/drivers/intc/userdef/intc_userdef.c',
+    'common/src/drivers/ostm/ostm_driver/ostm.c',
+    'common/src/drivers/ostm/userdef/ostm_userdef.c',
     'common/src/drivers/scif_uart/scif_uart_driver/scif_uart.c',
     'common/src/drivers/scif_uart/userdef/scif_uart_userdef.c',
     'common/src/sections.c',
+    'RTT/SEGGER_RTT_ASM_ARMv7M.S',
+    'RTT/SEGGER_RTT.c',
+    'RTT/SEGGER_RTT_printf.c',
     'gpio.c',
 )
 
@@ -68,6 +75,7 @@ native_rza1_args = [
 
 native_rza1_link_args = [
     '-mthumb',
+    '-lc',
     '-lrdimon',
     '-nostartfiles',
     '--specs=rdimon.specs',

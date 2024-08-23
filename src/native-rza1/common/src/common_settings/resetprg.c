@@ -35,6 +35,13 @@ Includes   <System Includes> , "Project Includes"
 #include <intrinsics.h>
 #endif
 #ifdef __GNUC__
+
+#define SEGGER_RTT_ASM
+#include "SEGGER_RTT.h"
+
+#undef printf
+#define printf SEGGER_RTT_printf
+
 #include "irq.h"
 #endif
 #include "r_typedefs.h"
@@ -95,36 +102,47 @@ Private global variables and functions
 *******************************************************************************/
 void SystemInit(void)
 {
+    printf(0, "Vbar Init.\n");
+    /* ==== Vector base address setting ==== */
+    VbarInit();
+
+    printf(0, "STB Init.\n");
     /* ==== Start clock supply of the peripheral functions ==== */
     STB_Init();
 
     /* ==== PORT setting ==== */
     PORT_Init();
 
+    printf(0, "BSC CS2 and CS3 Init.\n");
     /* ==== BSC setting ==== */
     /* Initialize the CS2 and the CS3 spaces */
     R_BSC_Init((uint8_t)BSC_AREA_CS3);
     R_BSC_Init((uint8_t)BSC_AREA_CS2);
 
+    __disable_fiq();
+    __disable_irq();
     /* ==== INTC setting ==== */
+    printf(0, "INTC Init.\n");
     R_INTC_Init();
 
     /* ==== Initial setting of the level 2 cache ==== */
-    L2CacheInit();
+    
+    // printf(0, "L2 Cache Init.\n");
+    // L2CacheInit();
 
+    printf(0, "L1 Cache Init.\n");
     /* ==== Initial setting of the level 1 cache ==== */
     L1CacheInit();
 
-    /* ==== Vector base address setting ==== */
-    VbarInit();
-
+    printf(0, "Enabling IRQ and FIQ\n");
     __enable_irq();         /* Enable IRQ interrupt */
     __enable_fiq();         /* Enable FIQ interrupt */
 
     /* ==== Initialize Terminal ==== */
     /* SCIF 2ch */
     /* P1 clock=66.67MHz CKS=0 SCBRR=17 Bit rate error=0.46% => Baud rate=115200bps */
-    IoInitScif2();
+    // IoInitScif2();
+    printf(0, "SystemInit Complete.\n");
 
 #ifdef __CC_ARM
     /* ==== Function call of main function ==== */

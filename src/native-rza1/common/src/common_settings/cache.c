@@ -272,10 +272,13 @@ void L1PrefetchDisable(void)
 void L2CacheFlushAll(void)
 {
     /* ==== Invalidate all cache by Way ==== */
+    /* Adjusting to sequence documented here: https://developer.arm.com/documentation/ddi0246/h/programmers-model/about-this-programmers-model/initialization-sequence?lang=en */
+    L2C.REG7_INV_WAY = (0xffffuL);
+
     /* Set "1" to Way bits[7:0] of the reg7_inv_way register */
-    L2C.REG7_INV_WAY = L2CACHE_8WAY;
+    // L2C.REG7_INV_WAY = L2CACHE_8WAY;
     /* Wait until Way bits[7:0] is cleard */
-    while ((L2C.REG7_INV_WAY & L2CACHE_8WAY) != 0x00000000uL)
+    while ((L2C.REG7_INV_WAY & (0xffffuL)) != 0x00000000uL)
     {
         /* Wait completion */
     }
@@ -289,8 +292,8 @@ void L2CacheFlushAll(void)
 ******************************************************************************/
 void L2CacheEnable(void)
 {
-    L2C.REG2_INT_CLEAR   = 0x000001FFuL;    /* Clear the reg2_int_raw_status register */
-    L2C.REG9_D_LOCKDOWN0 = 0x00000000uL;
+    L2C.REG2_INT_CLEAR      = 0x000001FFuL;    /* Clear the reg2_int_raw_status register */
+    L2C.REG9_D_LOCKDOWN0    = 0x00000000uL;
 
     L2C.REG1_CONTROL = 0x00000001uL;        /* Enable L2 cache */
 }

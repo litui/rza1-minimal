@@ -39,6 +39,7 @@
 @    IMPORT  Image$$VECTOR_MIRROR_TABLE$$Base
     
     .global  VbarInit
+    .type    VbarInit,%function
 
 VbarInit:    @FUNCTION
 

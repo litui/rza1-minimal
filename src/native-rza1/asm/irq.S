@@ -32,10 +32,14 @@
     .section CODE_IRQ_HANDLER @, CODE, READONLY
 
     .global __disable_irq
+    .type __disable_irq,%function
     .global __enable_irq
+    .type __enable_irq,%function
 
     .global __disable_fiq
+    .type __disable_fiq,%function
     .global __enable_fiq
+    .type __enable_fiq,%function
 
 __disable_irq:
     MRS     r0,APSR             @ formerly CPSR
@@ -46,7 +50,6 @@ __disable_irq:
 __enable_irq:
     CPSIE   I
     BX      LR
-
 
 __disable_fiq:
     CPSID   F

@@ -53,14 +53,14 @@
 @Start
 
 vector_table2:
-    LDR pc, =reset_handler          @ 0x0000_0000 : Reset exception
-    LDR pc, =undefined_handler      @ 0x0000_0004 : Undefined instructions exception
-    LDR pc, =svc_handler            @ 0x0000_0008 : Software interrupts exceptions
-    LDR pc, =prefetch_handler       @ 0x0000_000c : Prefetch abort exception
-    LDR pc, =abort_handler          @ 0x0000_0010 : Data abort exception
-    LDR pc, =reserved_handler       @ 0x0000_0014 : Reserved
-    LDR pc, =irq_handler            @ 0x0000_0018 : IRQ exception
-    LDR pc, =fiq_handler            @ 0x0000_001c : FIQ exception
+    LDR pc, =reset_handler          @ 0xFFFF_0000 : Reset exception
+    LDR pc, =undefined_handler      @ 0xFFFF_0004 : Undefined instructions exception
+    LDR pc, =svc_handler            @ 0xFFFF_0008 : Software interrupts exceptions
+    LDR pc, =prefetch_handler       @ 0xFFFF_000c : Prefetch abort exception
+    LDR pc, =abort_handler          @ 0xFFFF_0010 : Data abort exception
+    LDR pc, =reserved_handler       @ 0xFFFF_0014 : Reserved
+    LDR pc, =irq_handler            @ 0xFFFF_0018 : IRQ exception
+    LDR pc, =fiq_handler            @ 0xFFFF_001c : FIQ exception
 
 Literals:
     .LTORG

@@ -2,21 +2,15 @@
 
 MEMORY {
     ROM          (rx)  : ORIGIN = 0x00000000, LENGTH = 32M
-    BOOT_LOADER  (rx)  : ORIGIN = 0x18000000, LENGTH = 0x04000
-    SFLASH       (rx)  : ORIGIN = 0x18004000, LENGTH = (0x800000 - (0x00004000))
+    SFLASH       (rx)  : ORIGIN = 0x18000000, LENGTH = 0x800000
     SYSTEM_RAM   (rwx) : ORIGIN = 0x20020000, LENGTH = 0x04000
     STACK        (rw)  : ORIGIN = 0x20024000, LENGTH = 0x14000
     CACHED_RAM   (rw)  : ORIGIN = 0x20039000, LENGTH = 0x004C7000
-    SDRAM        (rw)  : ORIGIN = 0x08000000, LENGTH = 32M
     UNCACHED_RAM (rw)  : ORIGIN = 0x60500000, LENGTH = 0x00500000
 }
 
 SECTIONS
 {
-    .boot :
-    {
-        KEEP(*(.boot_loader))
-    } > BOOT_LOADER
     .text : {
 
         . = 0x00000000;
@@ -134,7 +128,7 @@ SECTIONS
 
         __data_end = LOADADDR(.data) + ( . - ADDR(.data) );
 
-    } > SYSTEM_RAM AT > SFLASH
+    } > SFLASH
     
     .bss : {
         __bss_start = .;
@@ -197,14 +191,11 @@ SECTIONS
         Image$$TTB$$ZI$$Limit = .;
     } > STACK
 
-    .SDRAM (NOLOAD) : {
-        * (BSS_DMAC_SAMPLE_SDRAM)           /* DMAC sample transfer destination work area */
-    } > SDRAM
-
     .uncached_RAM (NOLOAD) : {
         * (BSS_RIIC_SAMPLE)                 /* RIIC sample transfer work area */
         * (BSS_RSPI_SAMPLE)                 /* RSPI sample transfer work area */
         * (BSS_SCIF_SYNC_SAMPLE)            /* SCIF_SYNC sample work area */
+        * (BSS_DMAC_SAMPLE_SDRAM)           /* DMAC sample transfer destination work area */
         * (BSS_NANDNC)                      /* FLCTL work */
     } > UNCACHED_RAM
 

@@ -57,6 +57,7 @@
 @    IMPORT  INITSCT
 @    IMPORT  Enable_VFP
 @    IMPORT  main
+@    IMPORT  IRQ_FIQ_HANDLER
 
     .global  reset_handler
     .global  undefined_handler
@@ -64,6 +65,8 @@
     .global  prefetch_handler
     .global  abort_handler
     .global  reserved_handler
+    .global  irq_handler
+    .global  fiq_handler
 
 @******************************************************************************
 @ Function Name : reset_handler
@@ -74,6 +77,7 @@
 @               : of the standard library function to execute the main function.
 @******************************************************************************
     .global start
+    .type   start,%function
 start:
 reset_handler:   @FUNCTION {}
 
@@ -85,6 +89,9 @@ reset_handler:   @FUNCTION {}
     BIC  r0, r0, #(0x1 << 12)       @;; Clear I bit 12 to disable I Cache
     BIC  r0, r0, #(0x1 <<  2)       @;; Clear C bit  2 to disable D Cache
     BIC  r0, r0, #0x1               @;; Clear M bit  0 to disable MMU
+    @ Added the following two lines to hopefully solve the HIVECS issue
+    BIC  r0, r0, #(0x1 << 11)       @;; Clear Z bit 11 to disable branch prediction 
+    BIC  r0, r0, #(0x1 << 13)       @;; Clear V bit 13 to disable hivecs 
     MCR  p15, 0, r0, c1, c0, 0      @;; Write value back to CP15 System Control register
 
 @==================================================================
@@ -267,6 +274,5 @@ abort_handler:
 
 reserved_handler:
     B   reserved_handler            @;; Looping in this address
-
 
     .END
