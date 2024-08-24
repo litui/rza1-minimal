@@ -119,6 +119,8 @@ int32_t Userdef_OSTM0_Init(uint32_t mode, uint32_t cycle)
         /* CMP = P0 clock (kHz) * cycle (msec)           */
         /* (Assume that P0 clock has 33.333MHz)          */
 
+    R_INTC_Disable(INTC_ID_OSTM0TINT);
+
     /* ==== Register OS timer interrupt handler ==== */
     R_INTC_RegistIntFunc(INTC_ID_OSTM0TINT, Sample_OSTM0_Interrupt);
 

@@ -128,7 +128,7 @@ SECTIONS
 
         __data_end = LOADADDR(.data) + ( . - ADDR(.data) );
 
-    } > SFLASH
+    } > CACHED_RAM AT > SFLASH
     
     .bss : {
         __bss_start = .;

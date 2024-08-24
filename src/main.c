@@ -10,6 +10,7 @@
 #include "devdrv_ostm.h"        /* OSTM Driver Header */
 #include "main.h"
 #include "gpio.h"
+#include "devdrv_intc.h"
 
 #define MAIN_LED_ON     (1)
 #define MAIN_LED_OFF    (0)
@@ -39,6 +40,9 @@ int main(void)
     printf(0, "Initializing OS Timer\n");
     /* ==== Initialize OS timer (channel 0) ==== */
     R_OSTM_Init(DEVDRV_CH_0, OSTM_MODE_INTERVAL, 500);
+
+    /* Try forcing the remap of the interrupt function here */
+    R_INTC_RegistIntFunc(INTC_ID_OSTM0TINT, Sample_OSTM0_Interrupt);
 
     printf(0, "Starting OS Timer 0\n");
     /* ==== Start OS timer (channel 0) ==== */
@@ -71,7 +75,7 @@ int main(void)
 
 void Sample_OSTM0_Interrupt(uint32_t int_sense)
 {
-    printf(0, "Running Interrupt Function\n");
+    // printf(0, "Running Interrupt Function\n");
     /* ==== LED blink ==== */
     main_led_flg ^= 1;
 

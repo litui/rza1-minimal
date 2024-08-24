@@ -47,6 +47,12 @@ Includes   <System Includes> , "Project Includes"
 #pragma arm section zidata = "BSS_HANDLER_JMPTBL"
 #endif
 
+#define SEGGER_RTT_ASM
+#include "SEGGER_RTT.h"
+
+#undef printf
+#define printf SEGGER_RTT_printf
+
 /******************************************************************************
 Typedef definitions
 ******************************************************************************/
@@ -65,7 +71,7 @@ Imported global variables and functions (from other files)
 /******************************************************************************
 Exported global variables and functions (to be accessed by other files)
 ******************************************************************************/
-
+volatile uint32_t intc_func_active = 0;
 
 /******************************************************************************
 Private global variables and functions
@@ -713,13 +719,14 @@ void Userdef_INTC_UndefId(uint16_t int_id)
 ******************************************************************************/
 static void Userdef_INTC_Dummy_Interrupt(uint32_t int_sense)
 {
-    /* Execute processing when receiving interrupt ID whicn is not registered */
-    __disable_irq();
+    printf(0, "Called INTC dummy interrupt %u.\n", intc_func_active);
+    // /* Execute processing when receiving interrupt ID whicn is not registered */
+    // __disable_irq();
 
-    while (1)
-    {
-        /* Do Nothing */
-    }
+    // while (1)
+    // {
+    //     /* Do Nothing */
+    // }
 }
 
 /******************************************************************************
@@ -738,7 +745,9 @@ static void Userdef_INTC_Dummy_Interrupt(uint32_t int_sense)
 ******************************************************************************/
 void Userdef_INTC_HandlerExe(uint16_t int_id, uint32_t int_sense)
 {
+    intc_func_active = int_id;
     intc_func_table[int_id](int_sense);
+    intc_func_active = 0;
 }
 
 /******************************************************************************

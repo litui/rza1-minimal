@@ -102,10 +102,6 @@ Private global variables and functions
 *******************************************************************************/
 void SystemInit(void)
 {
-    printf(0, "Vbar Init.\n");
-    /* ==== Vector base address setting ==== */
-    VbarInit();
-
     printf(0, "STB Init.\n");
     /* ==== Start clock supply of the peripheral functions ==== */
     STB_Init();
@@ -133,6 +129,10 @@ void SystemInit(void)
     printf(0, "L1 Cache Init.\n");
     /* ==== Initial setting of the level 1 cache ==== */
     L1CacheInit();
+
+    printf(0, "Vbar Init.\n");
+    /* ==== Vector base address setting ==== */
+    VbarInit();
 
     printf(0, "Enabling IRQ and FIQ\n");
     __enable_irq();         /* Enable IRQ interrupt */
