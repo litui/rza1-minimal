@@ -21,31 +21,20 @@
 * Copyright (C) 2012 - 2015 Renesas Electronics Corporation. All rights reserved.
 *******************************************************************************/
 /*******************************************************************************
-* File Name   : resetprg.c
+* File Name   : stb_init.c
 * $Rev: 1330 $
 * $Date:: 2015-02-17 16:07:56 +0900#$
-* Description : Sub Main
+* Description : Initialize peripheral function sample - Standby Control initialize
 *******************************************************************************/
 
 
 /******************************************************************************
 Includes   <System Includes> , "Project Includes"
 ******************************************************************************/
-#ifdef __ICCARM__
-#include <intrinsics.h>
-#endif
-#ifdef __GNUC__
-
-#include "irq.h"
-#endif
 #include "r_typedefs.h"
-#include "devdrv_bsc.h"         /* Common Driver Header */
-#include "devdrv_intc.h"        /* INTC Driver Header   */
-#include "resetprg.h"
-#include "cache.h"
-#include "sio_char.h"
 #include "stb_init.h"
-#include "port_init.h"
+#include "iodefine.h"
+#include "unused.h"
 
 #ifdef __CC_ARM
 #pragma arm section code   = "CODE_RESET"
@@ -62,9 +51,6 @@ Typedef definitions
 /******************************************************************************
 Macro definitions
 ******************************************************************************/
-#ifdef __CC_ARM
-#define SystemInit  $Sub$$main
-#endif
 
 
 /******************************************************************************
@@ -82,64 +68,48 @@ Private global variables and functions
 ******************************************************************************/
 
 
-/*******************************************************************************
-* Function Name: SystemInit
-* Description  : Executes initial setting for the peripheral functions, and 
-*              : jumps to the main function by calling the $Super$$main of the 
-*              : library function. In this sample code, initial settings for the
-*              : STB, PORT, INTC, and L1 cache are executed, and the vector 
-*              : base address is set to the on-chip RAM area. The IRQ and the
-*              : FIQ interrupts are enabled by calling the __enable_irq and 
-*              : __enable_fiq of the library function.
+/******************************************************************************
+* Function Name: STB_Init
+* Description  : Executes the STB initial setting.
+*              : In this sample code, initial settings for the STBCR2 to the 
+*              : STBCR12 are executed.
 * Arguments    : none
 * Return Value : none
-*******************************************************************************/
-void SystemInit(void)
+******************************************************************************/
+void STB_Init(void)
 {
-    /* ==== Start clock supply of the peripheral functions ==== */
-    STB_Init();
+    volatile uint8_t dummy_buf;
 
-    /* ==== PORT setting ==== */
-    PORT_Init();
+    /* ---- The clock of all modules is permitted. ---- */
+    CPG.STBCR2  = 0x6Au;        /* Port level is keep in standby mode, [1], [1], [0],           */
+                                /* [1], [0], [1], CoreSight                                     */
+    dummy_buf   = CPG.STBCR2;   /* (Dummy read)                                                 */
+    CPG.STBCR3  = 0x00u;        /* IEBus, IrDA, LIN0, LIN1, MTU2, RSCAN2, ADC, PWM              */
+    dummy_buf   = CPG.STBCR3;   /* (Dummy read)                                                 */
+    CPG.STBCR4  = 0x00u;        /* SCIF0, SCIF1, SCIF2, SCIF3, SCIF4, SCIF5, SCIF6, SCIF7       */
+    dummy_buf   = CPG.STBCR4;   /* (Dummy read)                                                 */
+    CPG.STBCR5  = 0x00u;        /* SCIM0, SCIM1, SDG0, SDG1, SDG2, SDG3, OSTM0, OSTM1           */
+    dummy_buf   = CPG.STBCR5;   /* (Dummy read)                                                 */
+    CPG.STBCR6  = 0x00u;        /* A/D, CEU, DISCOM0, DISCOM1, DRC0, DRC1, JCU, RTClock         */
+    dummy_buf   = CPG.STBCR6;   /* (Dummy read)                                                 */
+    CPG.STBCR7  = 0x24u;        /* DVDEC0, DVDEC1, [1], ETHER, FLCTL, [1], USB0, USB1           */
+    dummy_buf   = CPG.STBCR7;   /* (Dummy read)                                                 */
+    CPG.STBCR8  = 0x01u;        /* IMR-LS20, IMR-LS21, IMR-LSD, MMCIF, MOST50, AVB, SCUX, [1]   */
+    dummy_buf   = CPG.STBCR8;   /* (Dummy read)                                                 */
+    CPG.STBCR9  = 0x00u;        /* I2C0, I2C1, I2C2, I2C3, SPIBSC0, SPIBSC1, VDC50, VDC51       */
+    dummy_buf   = CPG.STBCR9;   /* (Dummy read)                                                 */
+    CPG.STBCR10 = 0x00u;        /* RSPI0, RSPI1, RSPI2, RSPI3, RSPI4, CD-ROMDEC, RSPDIF, RGPVG  */
+    dummy_buf   = CPG.STBCR10;  /* (Dummy read)                                                 */
+    CPG.STBCR11 = 0xC0u;        /* [1], [1], SSIF0, SSIF1, SSIF2, SSIF3, SSIF4, SSIF5           */
+    dummy_buf   = CPG.STBCR11;  /* (Dummy read)                                                 */
+    CPG.STBCR12 = 0xF0u;        /* [1], [1], [1], [1], SDHI00, SDHI01, SDHI10, SDHI11           */
+    dummy_buf   = CPG.STBCR12;  /* (Dummy read)                                                 */
+    CPG.STBCR13 = 0xF9u;        /* [1], [1], [1], [1], [1], PFV1, PFV0, [1]                     */
+    dummy_buf   = CPG.STBCR13;  /* (Dummy read)                                                 */
 
-    /* ==== BSC setting ==== */
-    /* Initialize the CS2 and the CS3 spaces */
-    R_BSC_Init((uint8_t)BSC_AREA_CS3);
-    R_BSC_Init((uint8_t)BSC_AREA_CS2);
-
-    __disable_fiq();
-    __disable_irq();
-    /* ==== INTC setting ==== */
-    R_INTC_Init();
-
-    /* ==== Initial setting of the level 2 cache ==== */
-    
-    /* Clear out all caches */
-    /* This seems to hang sometimes. Leaving it out until confirmed it's doing the right thing. */
-    // InvalidateAllCaches();
-
-    L2CacheInit();
-
-    /* ==== Initial setting of the level 1 cache ==== */
-    L1CacheInit();
-
-    /* ==== Vector base address setting ==== */
-    VbarInit();
-
-    __enable_irq();         /* Enable IRQ interrupt */
-    __enable_fiq();         /* Enable FIQ interrupt */
-
-    /* ==== Initialize Terminal ==== */
-    /* SCIF 2ch */
-    /* P1 clock=66.67MHz CKS=0 SCBRR=17 Bit rate error=0.46% => Baud rate=115200bps */
-    // IoInitScif2();
-
-#ifdef __CC_ARM
-    /* ==== Function call of main function ==== */
-    $Super$$main();
-#endif
+    R_UNUSED(dummy_buf);
 }
 
 
-/* END of File */
+/* End of File */
 

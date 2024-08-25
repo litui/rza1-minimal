@@ -3,7 +3,7 @@ project('rza1-minimal', 'c',
   default_options : [
     'warning_level=2',
     'c_std=c11',
-    # 'optimization=s',
+    'optimization=s',
     'debug=true',
     'werror=false'
   ]
