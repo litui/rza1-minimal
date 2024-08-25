@@ -47,12 +47,6 @@ Includes   <System Includes> , "Project Includes"
 #pragma arm section zidata = "BSS_HANDLER_JMPTBL"
 #endif
 
-#define SEGGER_RTT_ASM
-#include "SEGGER_RTT.h"
-
-#undef printf
-#define printf SEGGER_RTT_printf
-
 /******************************************************************************
 Typedef definitions
 ******************************************************************************/
@@ -719,14 +713,13 @@ void Userdef_INTC_UndefId(uint16_t int_id)
 ******************************************************************************/
 static void Userdef_INTC_Dummy_Interrupt(uint32_t int_sense)
 {
-    printf(0, "Called INTC dummy interrupt %u.\n", intc_func_active);
-    // /* Execute processing when receiving interrupt ID whicn is not registered */
-    // __disable_irq();
+    /* Execute processing when receiving interrupt ID whicn is not registered */
+    __disable_irq();
 
-    // while (1)
-    // {
-    //     /* Do Nothing */
-    // }
+    while (1)
+    {
+        /* Do Nothing */
+    }
 }
 
 /******************************************************************************

@@ -34,6 +34,7 @@ Includes   <System Includes> , "Project Includes"
 #include "r_typedefs.h"
 #include "cache.h"
 #include "iodefine.h"
+#include "rza_io_regrw.h"
 
 #ifdef __CC_ARM
 #pragma arm section code   = "CODE_CACHE_OPERATION"
@@ -307,6 +308,49 @@ void L2CacheEnable(void)
 void L2CacheDisable(void)
 {
     L2C.REG1_CONTROL = 0x00000000uL;        /* Disable L2 cache */
+}
+
+/* Borrowed routine from Blackmagic Debug project */
+void InvalidateAllCaches(void)
+{
+    uint32_t cache_geometry;
+    __asm volatile ("MRC p15, 1, %0, c0, c0, 1" : "=r"(cache_geometry));
+    const uint8_t coherence_level = (cache_geometry & 0x07000000U) >> 24U;
+
+    for (uint8_t cache_level = 0; cache_level < coherence_level; ++cache_level) {
+        const uint8_t cache_type = (cache_geometry >> (cache_level * 3U)) & 0x07U;
+
+		if ((cache_type & 0x02U) != 0x02U)
+			continue;
+
+        /* CSSELR */
+        __asm ("MCR p15, 2, %0, c0, c0, 0" :: "r"(cache_level << 1U));
+
+        uint32_t cache_size;
+        /* CCSIDR */
+        __asm volatile ("MRC p15, 1, %0, c0, c0, 0" : "=r"(cache_size));
+
+        const uint8_t cache_set_shift = (cache_size & 7U) + 4U;
+		/* Extract the cache associativity (number of ways) */
+		const uint16_t cache_ways = ((cache_size >> 3U) & 0x3ffU) + 1U;
+		/* Extract the number of cache sets */
+		const uint16_t cache_sets = ((cache_size >> 13U) & 0x7fffU) + 1U;
+		/* Calculate how much to shift the cache way number by */
+		const uint8_t cache_ways_shift = 32U - ulog2(cache_ways - 1U);
+		/* For each set in the cache */
+		for (uint16_t cache_set = 0U; cache_set < cache_sets; ++cache_set) {
+			/* For each way in the cache */
+			for (uint16_t cache_way = 0U; cache_way < cache_ways; ++cache_way) {
+                /* DCCISW */
+                __asm ("MCR p15, 0, %0, c7, c14, 2" :: "r"(
+                    (cache_way << cache_ways_shift) | (cache_set << cache_set_shift) | (cache_level << 1U)
+                ));
+            }
+        }
+    }
+
+    /* ICIALLU */
+    __asm ("MCR p15, 0, %0, c7, c5, 0" :: "r"(0));
 }
 
 

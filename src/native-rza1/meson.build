@@ -7,7 +7,6 @@ native_rza1_includes = include_directories(
     'common/src/drivers/ostm/inc',
     'common/src/drivers/scif_uart/inc',
     'common',
-    'RTT',
     '.',
 )
 
@@ -37,9 +36,7 @@ native_rza1_generic_sources = files(
     'common/src/drivers/scif_uart/scif_uart_driver/scif_uart.c',
     'common/src/drivers/scif_uart/userdef/scif_uart_userdef.c',
     'common/src/sections.c',
-    'RTT/SEGGER_RTT_ASM_ARMv7M.S',
-    'RTT/SEGGER_RTT.c',
-    'RTT/SEGGER_RTT_printf.c',
+    'maths_utils.c',
     'gpio.c',
 )
 
