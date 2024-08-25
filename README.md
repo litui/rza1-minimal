@@ -1,6 +1,6 @@
 ## Minimal RZ/A1 build for Renesas GR-LYCHEE and GR-PEACH
 
-Based on the `RZ_A1H_other_sample` code from Renesas, this repo aims to be a starting point for developers looking to write code for the [GR-LYCHEE](https://os.mbed.com/platforms/Renesas-GR-LYCHEE/) or [GR-PEACH](https://os.mbed.com/platforms/Renesas-GR-PEACH/) without the need to rely on Renesas's e2studio IDE or the IDE4GR. Unlike most of the RZA example code from Renesas and ARM/MBED, this code is not bound to FreeRTOS or MbedOS but is somewhat barebones and has been adapted to run successfully from (SFLASH `0x18000000`) on the GR-PEACH and GR-LYCHEE which are locked to boot mode 3 and boot mode 1, respectively.
+Based on the `RZ_A1H_other_sample` code from Renesas, this repo aims to be a starting point for developers looking to write code for the [GR-LYCHEE](https://os.mbed.com/platforms/Renesas-GR-LYCHEE/) or [GR-PEACH](https://os.mbed.com/platforms/Renesas-GR-PEACH/) without the need to rely on Renesas's e2studio IDE or the IDE4GR. Unlike most of the RZA example code from Renesas and ARM/MBED, this code is not bound to FreeRTOS or MbedOS but is somewhat barebones and has been adapted to run successfully from SFLASH (`0x18000000`) on the GR-PEACH and GR-LYCHEE which are locked to boot mode 3 and boot mode 1, respectively.
 
 While it's not all linked, most of the Renesas Sample code was left intact in the repo and will be adapted or cleared out over time.
 
@@ -12,11 +12,11 @@ The Meson build system was used for this repo. Please ensure you have meson inst
 
 To set up the build for the GR-LYCHEE and place binaries into the `build-lychee` subdirectory, run the following:
 
-```meson setup --cross-file cross-file/rza1 -Dfirmware_target=gr-lychee build-lychee```
+```meson setup --cross-file cross-file/rza1.ini -Dfirmware_target=gr-lychee build-lychee```
 
 For the GR-PEACH, adjust to the following:
 
-```meson setup --cross-file cross-file/rza1 -Dfirmware_target=gr-peach build-peach```
+```meson setup --cross-file cross-file/rza1.ini -Dfirmware_target=gr-peach build-peach```
 
 Then, to build just run the following and replace `build-directory` with the directory you pointed meson to above:
 
