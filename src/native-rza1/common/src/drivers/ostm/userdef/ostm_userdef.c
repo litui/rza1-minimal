@@ -49,7 +49,7 @@ Typedef definitions
 Macro definitions
 ******************************************************************************/
 /* ---- P0 clock (Unit : kHz) ---- */
-#define P0_CLOCK_FREQUENCY_kHz  (33.333 * 1000)     /* Assume 33.333MHz */
+#define P0_CLOCK_FREQUENCY_kHz  (long long int)(33.333F * 1000U)     /* Assume 33.333MHz */
 
 /* ---- Timer cycle specification(Argument cycle)(Unit : ms) maximum value ---- */
     /* The maximum value is H'FFFF_FFFF because CMP is the register which has 32 bits */

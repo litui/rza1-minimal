@@ -14,13 +14,6 @@ static bool main_led_flg = false;      /* LED lighting/turning off */
 
 void SystemInit(void);
 
-void runfor(uint32_t iterations)
-{
-    for (uint32_t i = 0; i < iterations; i++) {
-        ;
-    }
-}
-
 int main(void)
 {
     SystemInit();
@@ -39,10 +32,6 @@ int main(void)
 
     /* ==== Start OS timer (channel 0) ==== */
     R_OSTM_Open(DEVDRV_CH_0);
-
-    while(1) {
-        runfor(20000);
-    }
 
     return 0;
 }
