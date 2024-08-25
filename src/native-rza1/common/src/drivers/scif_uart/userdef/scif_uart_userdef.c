@@ -36,6 +36,7 @@ Includes   <System Includes> , "Project Includes"
 #include "devdrv_scif_uart.h"       /* UART Driver header */
 #include "iodefine.h"
 #include "rza_io_regrw.h"
+#include "unused.h"
 
 /******************************************************************************
 Typedef definitions
@@ -192,6 +193,8 @@ void Userdef_SCIF2_UART_Init(uint8_t mode, uint16_t cks, uint8_t scbrr)
     b1 SPB2IO - Serial port break output : Enabled
     b0 SPB2DT - Serial port break data   : High-level */
     SCIF2.SCSPTR |= 0x0003u;
+
+    R_UNUSED(dummy_buf);
 }
 
 

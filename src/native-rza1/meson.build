@@ -36,7 +36,6 @@ native_rza1_generic_sources = files(
     'common/src/drivers/scif_uart/scif_uart_driver/scif_uart.c',
     'common/src/drivers/scif_uart/userdef/scif_uart_userdef.c',
     'common/src/sections.c',
-    'maths_utils.c',
     'gpio.c',
 )
 

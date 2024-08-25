@@ -38,6 +38,7 @@ Includes   <System Includes> , "Project Includes"
 #include "iodefine.h"
 #include "main.h"
 #include "rza_io_regrw.h"
+#include "unused.h"
 
 /******************************************************************************
 Typedef definitions
@@ -130,6 +131,8 @@ int32_t Userdef_OSTM0_Init(uint32_t mode, uint32_t cycle)
     /* ==== Validate OS timer interrupt ==== */
     R_INTC_Enable(INTC_ID_OSTM0TINT);
 
+    R_UNUSED(dummy_buf);
+
     return DEVDRV_SUCCESS;
 }
 
@@ -149,6 +152,8 @@ int32_t Userdef_OSTM0_Init(uint32_t mode, uint32_t cycle)
 int32_t Userdef_OSTM1_Init(uint32_t mode, uint32_t cycle)
 {
     /* Change processing when using OSTM1 */
+    R_UNUSED(mode);
+    R_UNUSED(cycle);
     return 0;
 }
 

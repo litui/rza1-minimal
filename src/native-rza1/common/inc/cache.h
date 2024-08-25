@@ -70,7 +70,7 @@ void L2CacheFlushAll(void);
 void L2CacheEnable(void);
 void L2CacheDisable(void);
 
-/* Borrowed routines from Blackmagic Debug */
+/* Borrowed and adjusted routine from Blackmagic Debug project */
 void InvalidateAllCaches(void);
 
 extern void L1CacheInit(void);

@@ -35,6 +35,7 @@ Includes   <System Includes> , "Project Includes"
 #include "dev_drv.h"                /* Device Driver common header */
 #include "devdrv_intc.h"            /* INTC Driver Header */
 #include "iodefine.h"
+#include "unused.h"
 
 /******************************************************************************
 Typedef definitions
@@ -332,6 +333,8 @@ int32_t R_INTC_SetMaskLevel(uint8_t mask_level)
     mask_level  = mask_level << 3;  /* ICCPMR[7:3] is valid bit */
     INTC.ICCPMR = mask_level;       /* Write ICCPMR             */
     dummy_buf_8b = INTC.ICCPMR;
+
+    R_UNUSED(dummy_buf_8b);
 
     return DEVDRV_SUCCESS;
 }

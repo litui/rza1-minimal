@@ -36,6 +36,7 @@ Includes   <System Includes> , "Project Includes"
 #include "iodefine.h"
 #include "rza_io_regrw.h"
 #include "peripheral_init_basic.h"
+#include "unused.h"
 
 #ifdef __CC_ARM
 #pragma arm section code   = "CODE_BASIC_SETUP"
@@ -149,6 +150,9 @@ static void CPG_Init(void)
     /* ----  Writing to On-Chip Data-Retention RAM is enabled. ---- */
     CPG.SYSCR3 = 0x0Fu;
     dummy_buf_8b = CPG.SYSCR3;
+
+    R_UNUSED(dummy_buf_32b);
+    R_UNUSED(dummy_buf_8b);
 }
 
 /******************************************************************************

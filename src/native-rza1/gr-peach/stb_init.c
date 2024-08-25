@@ -34,6 +34,7 @@ Includes   <System Includes> , "Project Includes"
 #include "r_typedefs.h"
 #include "stb_init.h"
 #include "iodefine.h"
+#include "unused.h"
 
 #ifdef __CC_ARM
 #pragma arm section code   = "CODE_RESET"
@@ -105,6 +106,8 @@ void STB_Init(void)
     dummy_buf   = CPG.STBCR12;  /* (Dummy read)                                                 */
     CPG.STBCR13 = 0xF9u;        /* [1], [1], [1], [1], [1], PFV1, PFV0, [1]                     */
     dummy_buf   = CPG.STBCR13;  /* (Dummy read)                                                 */
+
+    R_UNUSED(dummy_buf);
 }
 
 

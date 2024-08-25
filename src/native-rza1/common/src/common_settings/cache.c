@@ -336,7 +336,7 @@ void InvalidateAllCaches(void)
 		/* Extract the number of cache sets */
 		const uint16_t cache_sets = ((cache_size >> 13U) & 0x7fffU) + 1U;
 		/* Calculate how much to shift the cache way number by */
-		const uint8_t cache_ways_shift = 32U - ulog2(cache_ways - 1U);
+		const uint8_t cache_ways_shift = 32U - ((uint8_t)((sizeof(uint32_t) * 8U) - (uint8_t)__builtin_clz(cache_ways)));
 		/* For each set in the cache */
 		for (uint16_t cache_set = 0U; cache_set < cache_sets; ++cache_set) {
 			/* For each way in the cache */

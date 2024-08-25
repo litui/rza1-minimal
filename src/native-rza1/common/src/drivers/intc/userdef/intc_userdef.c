@@ -47,6 +47,8 @@ Includes   <System Includes> , "Project Includes"
 #pragma arm section zidata = "BSS_HANDLER_JMPTBL"
 #endif
 
+#include "unused.h"
+
 /******************************************************************************
 Typedef definitions
 ******************************************************************************/
@@ -698,6 +700,7 @@ void Userdef_INTC_UndefId(uint16_t int_id)
     {
         /* Do Nothing */
     }
+    R_UNUSED(int_id);
 }
 
 /******************************************************************************
@@ -720,6 +723,8 @@ static void Userdef_INTC_Dummy_Interrupt(uint32_t int_sense)
     {
         /* Do Nothing */
     }
+    
+    R_UNUSED(int_sense);
 }
 
 /******************************************************************************

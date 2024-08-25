@@ -5,6 +5,7 @@
 #include "main.h"
 #include "gpio.h"
 #include "devdrv_intc.h"
+#include "unused.h"
 
 #define MAIN_LED_ON     (1)
 #define MAIN_LED_OFF    (0)
@@ -60,4 +61,6 @@ void Sample_OSTM0_Interrupt(uint32_t int_sense)
     {
         clear_gpio(6, 15);
     }
+
+    R_UNUSED(int_sense);
 }
