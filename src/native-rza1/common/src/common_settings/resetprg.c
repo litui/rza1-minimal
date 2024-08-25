@@ -104,7 +104,7 @@ void SystemInit(void)
     // PORT_Init();
 
     /* ==== BSC setting ==== */
-    /* Initialize the CS2 and the CS3 spaces */
+    /* Leaving these out until they're needed. */
     // R_BSC_Init((uint8_t)BSC_AREA_CS3);
     // R_BSC_Init((uint8_t)BSC_AREA_CS2);
 
@@ -114,8 +114,12 @@ void SystemInit(void)
     R_INTC_Init();
 
     /* Clear out all caches */
-    /* This seems to hang sometimes. Leaving it out until confirmed it's doing the right thing. */
     InvalidateAllCaches();
+
+#if defined(BOARD_GR_LYCHEE)
+    /* Disable L1 cache on GR-LYCHEE so enabling it again doesn't cause a lockup. */
+    L1CacheDisable();
+#endif
 
     /* ==== Initial setting of the level 2 cache ==== */
     L2CacheInit();
@@ -128,11 +132,6 @@ void SystemInit(void)
 
     __enable_irq();         /* Enable IRQ interrupt */
     __enable_fiq();         /* Enable FIQ interrupt */
-
-    /* ==== Initialize Terminal ==== */
-    /* SCIF 2ch */
-    /* P1 clock=66.67MHz CKS=0 SCBRR=17 Bit rate error=0.46% => Baud rate=115200bps */
-    // IoInitScif2();
 
 #ifdef __CC_ARM
     /* ==== Function call of main function ==== */

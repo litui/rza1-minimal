@@ -3,7 +3,7 @@ project('rza1-minimal', 'c',
   default_options : [
     'warning_level=2',
     'c_std=c11',
-    # 'optimization=s',
+    'optimization=s',
     'debug=true',
     'werror=false'
   ]
@@ -25,6 +25,18 @@ cc_host = meson.get_compiler('c')
 is_cross_build = meson.is_cross_build()
 
 firmware_target = get_option('firmware_target')
+
+# Determine if we are building the firmware or just the native library
+is_firmware_build = firmware_target != ''
+if is_firmware_build
+	# Ensure we are cross-compiling and not building for the build host
+	assert(
+		is_cross_build,
+		'''Must be cross-compiled to a specific board.
+Add the option --cross-file=cross-file.ini
+and -Dfirmware_target=gr-lychee or -Dfirmware_target=gr-peach'''
+  )
+endif
 
 cc_host = meson.get_compiler('c')
 if is_cross_build
@@ -100,11 +112,11 @@ subdir('src')
 
 is_firmware_build = firmware_target != ''
 
-# System binary utilities
-size = find_program('size')
-objcopy = find_program('objcopy')
-
 if is_firmware_build
+  # System binary utilities
+  size = find_program('size')
+  objcopy = find_program('objcopy')
+
   add_project_link_arguments('-Wl,--print-memory-usage', language: 'c')
 
   base_name = 'main'

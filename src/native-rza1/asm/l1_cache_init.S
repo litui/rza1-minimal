@@ -35,23 +35,22 @@
 @==================================================================
     .section INITCA9CACHE, #execinstr
 
+    .global  L1CacheDisable
+    .func    L1CacheDisable
+    .type    L1CacheDisable,%function
+
+L1CacheDisable:
+    MRC  p15, 0, r0, c1, c0, 0          @;; Read CP15 register 1
+    AND  r0, r0, #(0x0 << 12)           @;; Disable I Cache
+    AND  r0, r0, #(0x0 << 2)            @;; Disable D Cache
+    MCR  p15, 0, r0, c1, c0, 0          @;; Write CP15 register 1
+    .endfunc
+
     .global  L1CacheInit
     .func    L1CacheInit
     .type    L1CacheInit,%function
 
 L1CacheInit:
-
-@==================================================================
-@ Disable caches
-@ Caches are controlled by the System Control Register:
-@==================================================================
-    @;; I-cache is controlled by bit 12
-    @;; D-cache is controlled by bit 2
-
-    MRC  p15, 0, r0, c1, c0, 0          @;; Read CP15 register 1
-    AND  r0, r0, #(0x0 << 12)           @;; Disable I Cache
-    AND  r0, r0, #(0x0 << 2)            @;; Disable D Cache
-    MCR  p15, 0, r0, c1, c0, 0          @;; Write CP15 register 1
 
 @==================================================================
 @ Enable caches

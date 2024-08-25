@@ -74,6 +74,7 @@ void L2CacheDisable(void);
 void InvalidateAllCaches(void);
 
 extern void L1CacheInit(void);
+extern void L1CacheDisable(void);
 
 
 #endif  /* CACHE_H */
