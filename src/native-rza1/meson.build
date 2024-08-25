@@ -46,7 +46,18 @@ native_rza1_gr_peach_sources = files(
     'gr-peach/siochar.c',
 )
 
-native_rza1_gr_lychee_sources = files()
+native_rza1_gr_lychee_sources = files(
+    'gr-peach/peripheral_init_basic.c',
+    'gr-peach/port_init.c',
+    'gr-peach/stb_init.c',
+    'gr-peach/siochar.c',
+)
+
+native_rza1_args = [
+    '-mcpu=cortex-a9',
+    '-mfpu=neon',
+    '-mthumb',
+]
 
 firmware_target = get_option('firmware_target')
 if firmware_target == 'gr-peach'
@@ -55,19 +66,15 @@ if firmware_target == 'gr-peach'
         native_rza1_generic_sources,
         native_rza1_gr_peach_sources
     ]
+    native_rza1_args += '-DBOARD_GR_PEACH'
 elif firmware_target == 'gr-lychee'
     native_rza1_linker_file = 'gr-lychee.ld'
     native_rza1_sources = [
         native_rza1_generic_sources,
         native_rza1_gr_lychee_sources
     ]
+    native_rza1_args += '-DBOARD_GR_LYCHEE'
 endif
-
-native_rza1_args = [
-    '-mcpu=cortex-a9',
-    '-mfpu=neon',
-    '-mthumb',
-]
 
 native_rza1_link_args = [
     '-mthumb',

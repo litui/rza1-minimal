@@ -100,24 +100,24 @@ void SystemInit(void)
     STB_Init();
 
     /* ==== PORT setting ==== */
-    PORT_Init();
+    /* Pretty sure this is only for SDRAM */
+    // PORT_Init();
 
     /* ==== BSC setting ==== */
     /* Initialize the CS2 and the CS3 spaces */
-    R_BSC_Init((uint8_t)BSC_AREA_CS3);
-    R_BSC_Init((uint8_t)BSC_AREA_CS2);
+    // R_BSC_Init((uint8_t)BSC_AREA_CS3);
+    // R_BSC_Init((uint8_t)BSC_AREA_CS2);
 
     __disable_fiq();
     __disable_irq();
     /* ==== INTC setting ==== */
     R_INTC_Init();
 
-    /* ==== Initial setting of the level 2 cache ==== */
-    
     /* Clear out all caches */
     /* This seems to hang sometimes. Leaving it out until confirmed it's doing the right thing. */
-    // InvalidateAllCaches();
+    InvalidateAllCaches();
 
+    /* ==== Initial setting of the level 2 cache ==== */
     L2CacheInit();
 
     /* ==== Initial setting of the level 1 cache ==== */

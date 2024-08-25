@@ -2,9 +2,9 @@ option(
     'firmware_target',
     type: 'combo',
     choices: [
-        'gr-lychee',
+        '',
         'gr-peach',
+        'gr-lychee',
     ],
-    value: 'gr-peach',
     description: 'Target for firmware build.'
 )

@@ -7,6 +7,12 @@
 #include "devdrv_intc.h"
 #include "unused.h"
 
+#if defined(BOARD_GR_LYCHEE)
+#include "gr-lychee/pins.h"
+#else
+#include "gr-peach/pins.h"
+#endif
+
 #define MAIN_LED_ON     (1)
 #define MAIN_LED_OFF    (0)
 
@@ -16,12 +22,18 @@ void SystemInit(void);
 
 int main(void)
 {
+    init_gpio_as_output(R_LED1_PORT, R_LED1_PIN);
+    init_gpio_as_output(R_LED2_PORT, R_LED2_PIN);
+    init_gpio_as_output(R_LED3_PORT, R_LED3_PIN);
+    init_gpio_as_output(R_LED4_PORT, R_LED4_PIN);
+
+    /* Turn on LED1 to prove SystemInit has begun. */
+    set_gpio(R_LED1_PORT, R_LED1_PIN);
+
     SystemInit();
     
-    init_gpio_as_output(6, 12); /* USER LED (RED, outside eth port) */
-    init_gpio_as_output(6, 13); /* RED LED */
-    init_gpio_as_output(6, 14); /* GREEN LED */
-    init_gpio_as_output(6, 15); /* BLUE LED */
+    /* Turn off LED1 since SystemInit has concluded. */
+    clear_gpio(R_LED1_PORT, R_LED1_PIN);
     
     main_led_flg = MAIN_LED_OFF;    /* Initialize LED on/off flag */
     /* ==== Initialize OS timer (channel 0) ==== */
@@ -33,22 +45,24 @@ int main(void)
     /* ==== Start OS timer (channel 0) ==== */
     R_OSTM_Open(DEVDRV_CH_0);
 
+    /* Turn on LED2 to prove main function has reached its end. */
+    set_gpio(R_LED2_PORT, R_LED2_PIN);
+
     return 0;
 }
 
 void Sample_OSTM0_Interrupt(uint32_t int_sense)
 {
-    // printf(0, "Running Interrupt Function\n");
     /* ==== LED blink ==== */
     main_led_flg = !main_led_flg;
 
     if (MAIN_LED_ON == main_led_flg)
     {
-        set_gpio(6, 15);
+        set_gpio(R_LED4_PORT, R_LED4_PIN);
     }
     else
     {
-        clear_gpio(6, 15);
+        clear_gpio(R_LED4_PORT, R_LED4_PIN);
     }
 
     R_UNUSED(int_sense);

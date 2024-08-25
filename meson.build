@@ -3,7 +3,7 @@ project('rza1-minimal', 'c',
   default_options : [
     'warning_level=2',
     'c_std=c11',
-    'optimization=s',
+    # 'optimization=s',
     'debug=true',
     'werror=false'
   ]
@@ -20,6 +20,16 @@ project('rza1-minimal', 'c',
 fs = import('fs')
 
 cc_host = meson.get_compiler('c')
+
+# Grab if we're in cross-compilation mode or not
+is_cross_build = meson.is_cross_build()
+
+firmware_target = get_option('firmware_target')
+
+cc_host = meson.get_compiler('c')
+if is_cross_build
+	cc_native = meson.get_compiler('c', native: true)
+endif
 
 # Project wide flags
 extended_warnings = [
@@ -78,21 +88,26 @@ add_project_arguments(
 	cc_host.get_supported_arguments(extended_warnings),
 	language: 'c',
 )
+if is_cross_build
+	add_project_arguments(
+		cc_native.get_supported_arguments(extended_warnings),
+		language: 'c',
+		native: true,
+	)
+endif
 
 subdir('src')
 
-add_project_link_arguments('-Wl,--print-memory-usage', language: 'c')
+is_firmware_build = firmware_target != ''
 
 # System binary utilities
 size = find_program('size')
 objcopy = find_program('objcopy')
 
-firmware_target = get_option('firmware_target')
-
-is_firmware_build = firmware_target != ''
-
 if is_firmware_build
-  base_name = 'main_@0@'.format(firmware_target).to_lower().underscorify()
+  add_project_link_arguments('-Wl,--print-memory-usage', language: 'c')
+
+  base_name = 'main'
   elf_file = executable(
     f'@base_name@_firmware',
     name_suffix: 'elf',
@@ -129,6 +144,7 @@ endif
 summary(
 	{
 		'Building Firmware': is_firmware_build,
+    'Firmware target': firmware_target,
 	},
 	bool_yn: true,
 	section: 'RZA1 Minimal',
