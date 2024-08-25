@@ -31,16 +31,13 @@ int main(void)
     set_gpio(R_LED1_PORT, R_LED1_PIN);
 
     SystemInit();
-    
+
     /* Turn off LED1 since SystemInit has concluded. */
     clear_gpio(R_LED1_PORT, R_LED1_PIN);
     
     main_led_flg = MAIN_LED_OFF;    /* Initialize LED on/off flag */
     /* ==== Initialize OS timer (channel 0) ==== */
     R_OSTM_Init(DEVDRV_CH_0, OSTM_MODE_INTERVAL, 500);
-
-    /* Try forcing the remap of the interrupt function here */
-    R_INTC_RegistIntFunc(INTC_ID_OSTM0TINT, Sample_OSTM0_Interrupt);
 
     /* ==== Start OS timer (channel 0) ==== */
     R_OSTM_Open(DEVDRV_CH_0);
