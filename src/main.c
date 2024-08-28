@@ -2,9 +2,9 @@
 #include "r_typedefs.h"
 #include "dev_drv.h"            /* Device Driver common header */
 #include "devdrv_ostm.h"        /* OSTM Driver Header */
+#include "devdrv_rspi.h"
 #include "main.h"
 #include "gpio.h"
-#include "devdrv_intc.h"
 #include "unused.h"
 
 #if defined(BOARD_GR_LYCHEE)
@@ -41,6 +41,15 @@ int main(void)
 
     /* ==== Start OS timer (channel 0) ==== */
     R_OSTM_Open(DEVDRV_CH_0);
+
+    /* Initialize SDCard-related GPIO */
+    init_gpio_as_alt(R_SDCARD_CLK_PORT, R_SDCARD_CLK_PIN, R_SDCARD_CLK_MUX);
+    init_gpio_as_alt(R_SDCARD_CMD_PORT, R_SDCARD_CMD_PIN, R_SDCARD_CMD_MUX);
+    init_gpio_as_alt(R_SDCARD_DAT0_PORT, R_SDCARD_DAT0_PIN, R_SDCARD_DAT0_MUX);
+    init_gpio_as_alt(R_SDCARD_DAT3_PORT, R_SDCARD_DAT3_PIN, R_SDCARD_DAT3_MUX);
+    init_gpio_as_output(R_SDCARD_CD_PORT, R_SDCARD_CD_PIN);
+
+    R_RSPI_Init(R_SDCARD_SPI_CHANNEL);
 
     /* Turn on LED2 to prove main function has reached its end. */
     set_gpio(R_LED2_PORT, R_LED2_PIN);

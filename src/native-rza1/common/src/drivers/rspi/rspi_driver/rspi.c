@@ -46,7 +46,11 @@ Typedef definitions
 Macro definitions
 ******************************************************************************/
 /* ==== RSPI H/W specification ==== */
+#if defined(BOARD_GR_LYCHEE)
+#define RSPI_CH_TOTAL           (3)
+#else
 #define RSPI_CH_TOTAL           (5)     /* RSPI channels */
+#endif
 
 /* ==== Access to SPDR register ==== */
 #define RSPI_SPDR_ACCESS_8      (1)     /* 8-bit access  */

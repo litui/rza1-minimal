@@ -6,6 +6,7 @@ native_rza1_includes = include_directories(
     'common/src/drivers/intc/inc',
     'common/src/drivers/ostm/inc',
     'common/src/drivers/scif_uart/inc',
+    'common/src/drivers/rspi/inc',
     'common',
     '.',
 )
@@ -35,6 +36,8 @@ native_rza1_generic_sources = files(
     'common/src/drivers/ostm/userdef/ostm_userdef.c',
     'common/src/drivers/scif_uart/scif_uart_driver/scif_uart.c',
     'common/src/drivers/scif_uart/userdef/scif_uart_userdef.c',
+    'common/src/drivers/rspi/rspi_driver/rspi.c',
+    'common/src/drivers/rspi/userdef/rspi_userdef.c',
     'common/src/sections.c',
     'gpio.c',
 )

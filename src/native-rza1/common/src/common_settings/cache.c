@@ -276,8 +276,6 @@ void L2CacheFlushAll(void)
     /* Adjusting to sequence documented here: https://developer.arm.com/documentation/ddi0246/h/programmers-model/about-this-programmers-model/initialization-sequence?lang=en */
     L2C.REG7_INV_WAY = (0xffffuL);
 
-    /* Set "1" to Way bits[7:0] of the reg7_inv_way register */
-    // L2C.REG7_INV_WAY = L2CACHE_8WAY;
     /* Wait until Way bits[7:0] is cleard */
     while ((L2C.REG7_INV_WAY & (0xffffuL)) != 0x00000000uL)
     {
@@ -310,7 +308,7 @@ void L2CacheDisable(void)
     L2C.REG1_CONTROL = 0x00000000uL;        /* Disable L2 cache */
 }
 
-/* Borrowed routine from Blackmagic Debug project */
+/* Borrowed and adjusted routine from Blackmagic Debug project */
 void InvalidateAllCaches(void)
 {
     uint32_t cache_geometry;
