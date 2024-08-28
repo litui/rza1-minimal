@@ -78,6 +78,7 @@ int32_t R_RSPI_ResetBuffer(uint32_t channel);
 int32_t R_RSPI_SpriInterrupt(uint32_t channel);
 int32_t R_RSPI_SptiInterrupt(uint32_t channel);
 int32_t R_RSPI_WaitTransmitEnd(uint32_t channel);
+volatile struct st_rspi * RSPI_GetRegAddr(uint32_t channel);
 
 
 /* ==== User-defined functions ==== */

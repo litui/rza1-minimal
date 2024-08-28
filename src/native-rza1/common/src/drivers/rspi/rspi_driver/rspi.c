@@ -78,7 +78,6 @@ static void    RSPI_Close(volatile struct st_rspi * rspi);
 static int32_t RSPI_Receive(uint32_t channel, void * buffer, uint32_t count, uint8_t rxtrg);
 static int32_t RSPI_Transmit(uint32_t channel, void * buffer, uint32_t count, uint8_t txtrg);
 static void    RSPI_ResetBuffer(volatile struct st_rspi * rspi);
-static volatile struct st_rspi * RSPI_GetRegAddr(uint32_t channel);
 
 /* FIFO buffer trigger (TXTRG, RXTRG) setting value conversion table */
 static uint32_t rspi_txtrg_table[4] = { 1, 2, 4, 8 };
@@ -1021,7 +1020,7 @@ static void RSPI_ResetBuffer(volatile struct st_rspi * rspi)
 * Arguments    : uint32_t channel : RSPI channel (0 to 4)
 * Return Value : struct st_rspi * : Start address of RSPI register by channel
 ******************************************************************************/
-static volatile struct st_rspi * RSPI_GetRegAddr(uint32_t channel)
+volatile struct st_rspi * RSPI_GetRegAddr(uint32_t channel)
 {
     volatile struct st_rspi * rspi;
 

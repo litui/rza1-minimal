@@ -120,7 +120,6 @@ void Userdef_SPTI1_Interrupt(uint32_t int_sense);
 void Userdef_SPTI2_Interrupt(uint32_t int_sense);
 void Userdef_SPTI3_Interrupt(uint32_t int_sense);
 void Userdef_SPTI4_Interrupt(uint32_t int_sense);
-static volatile struct st_rspi * RSPI_GetRegAddr(uint32_t channel);
 
 static void InitMemory8Bit(uint8_t * addr, uint8_t data, uint32_t count, uint8_t increment)
 {
@@ -1307,43 +1306,6 @@ void Userdef_SPTI4_Interrupt(uint32_t int_sense)
 {
     Userdef_RSPI4_SetTransmitEmpty();
     R_UNUSED(int_sense);
-}
-
-/******************************************************************************
-* Function Name: RSPI_GetRegAddr
-* Description  : Obtains the start address of the RSPI-related registers of the 
-*              : specified channel.
-* Arguments    : uint32_t channel : RSPI channel (0 to 4)
-* Return Value : struct st_rspi * : Start address of RSPI register by channel
-******************************************************************************/
-static volatile struct st_rspi * RSPI_GetRegAddr(uint32_t channel)
-{
-    volatile struct st_rspi * rspi;
-
-    switch (channel)
-    {
-        case DEVDRV_CH_0:
-            rspi = &RSPI0;
-        break;
-        case DEVDRV_CH_1:
-            rspi = &RSPI1;
-        break;
-        case DEVDRV_CH_2:
-            rspi = &RSPI2;
-        break;
-        case DEVDRV_CH_3:
-            rspi = &RSPI3;
-        break;
-        case DEVDRV_CH_4:
-            rspi = &RSPI4;
-        break;
-        default:
-            /* Do not reach here based on the assumption */
-            rspi = &RSPI0;
-        break;
-    }
-
-    return rspi;
 }
 
 /* End of File */
