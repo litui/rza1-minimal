@@ -62,85 +62,78 @@ Exported global variables and functions (to be accessed by other files)
 Private global variables and functions
 ******************************************************************************/
 
+static void SetClockStandby(devdrv_ch_t channel, bool off_on);
+void GenericUARTInit(devdrv_ch_t channel, uint8_t mode, uint16_t cks, uint8_t scbrr);
 
-/******************************************************************************
-* Function Name: Userdef_SCIF2_UART_Init
-* Description  : Executes the setting for initialization of the UART function of 
-*              : channel 2 SCIF. Specifies the mode for transmission, reception, 
-*              : or transmission/reception to the argument mode. The values to 
-*              : be set to the CKS bit of the serial mode register (SCSMR) and the
-*              : bit rate register (SCBRR) are specified to the argument csk and 
-*              : scbrr according to the UAART baud rate used in the system.
-* Arguments    : uint8_t  mode    : Mode : 
-*              :                  :    B'x..xxx
-*              :                  :      |  ||+-- [0] 1=Use transmit, 0=Do not use transmit
-*              :                  :      |  |+--- [1] 1=Use receive,, 0=Do not use receive
-*              :                  :      |  +---- [2] (Reserved)
-*              :                  :      |         :     :  
-*              :                  :      +------- [7] (Reserved)
-*              : uint16_t cks     : Select SCIF clock source
-*              :                  : (Setting value of SCSMR CKS bit)
-*              :                  :   SCIF_CKS_DIVISION_1  : P1 clock
-*              :                  :   SCIF_CKS_DIVISION_4  : P1 clock / 4
-*              :                  :   SCIF_CKS_DIVISION_16 : P1 clock / 16
-*              :                  :   SCIF_CKS_DIVISION_64 : P1 clock / 64
-*              : uint8_t  scbrr   : Setting value of SCIF bit rate register (SCBRR)
-* Return Value : none
-******************************************************************************/
-void Userdef_SCIF2_UART_Init(uint8_t mode, uint16_t cks, uint8_t scbrr)
+static void SetClockStandby(devdrv_ch_t channel, bool off_on)
 {
+    const uint8_t mstp_shift = 7U - (uint8_t)channel;
+    const uint8_t mstp_mask = 1U << mstp_shift;
+
     volatile uint8_t dummy_buf;
 
+    /* 
+     * Write value (0 or 1) to the bit for the correct UART module in the Standby Control Register
+     */
+    RZA_IO_RegWrite_8(&CPG.STBCR4, off_on ? 1 : 0, mstp_shift, mstp_mask);
+    dummy_buf = CPG.STBCR4;
+
+    R_UNUSED(dummy_buf);
+}
+
+void GenericUARTInit(devdrv_ch_t channel, uint8_t mode, uint16_t cks, uint8_t scbrr)
+{
+    volatile uint8_t dummy_buf;
+    volatile struct st_scif * scif = SCIF_GetRegAddr(channel);
+
     /* ==== Module standby clear ==== */
-    /* ---- Supply clock to the SCIF(channel 2) ---- */
-    RZA_IO_RegWrite_8(&CPG.STBCR4, 0, CPG_STBCR4_MSTP45_SHIFT, CPG_STBCR4_MSTP45);
-    dummy_buf = CPG.STBCR4;     /* Dummy read */
+    SetClockStandby(channel, false);
 
     /* ==== SCIF initial setting ==== */
-    /* ---- Serial control register (SCSCR2) setting ---- */
-    SCIF2.SCSCR = 0x0000u;          /* SCIF transmitting and receiving operations stop */
+    /* ---- Serial control register (SCSCR) setting ---- */
+    scif->SCSCR = 0x0000u;          /* SCIF transmitting and receiving operations stop */
 
-    /* ---- FIFO control register (SCFCR2) setting ---- */
+    /* ---- FIFO control register (SCFCR) setting ---- */
     if (SCIF_UART_MODE_W == (mode & SCIF_UART_MODE_W))      /* Use transmit */
     {
         /* Transmit FIFO reset */
-        RZA_IO_RegWrite_16(&SCIF2.SCFCR, 1, SCIF2_SCFCR_TFRST_SHIFT, SCIF2_SCFCR_TFRST);
+        RZA_IO_RegWrite_16(&(scif->SCFCR), 1, SCIFn_SCFCR_TFRST_SHIFT, SCIFn_SCFCR_TFRST);
     }
 
     if (SCIF_UART_MODE_R == (mode & SCIF_UART_MODE_R))      /* Use receive */
     {
         /* Receive FIFO data register reset */
-        RZA_IO_RegWrite_16(&SCIF2.SCFCR, 1, SCIF2_SCFCR_RFRST_SHIFT, SCIF2_SCFCR_RFRST);
+        RZA_IO_RegWrite_16(&(scif->SCFCR), 1, SCIFn_SCFCR_RFRST_SHIFT, SCIFn_SCFCR_RFRST);
     }
 
-    /* ---- Serial status register (SCFSR2) setting ---- */
-    SCIF2.SCFSR &= 0xFF6Eu;         /* ER,BRK,DR bit clear */
+    /* ---- Serial status register (SCFSR) setting ---- */
+    scif->SCFSR &= 0xFF6Eu;         /* ER,BRK,DR bit clear */
 
-    /* ---- Line status register (SCLSR2) setting ---- */
+    /* ---- Line status register (SCLSR) setting ---- */
     /* ORER bit clear */
-    RZA_IO_RegWrite_16(&SCIF2.SCLSR, 0, SCIF2_SCLSR_ORER_SHIFT, SCIF2_SCLSR_ORER);
+    RZA_IO_RegWrite_16(&(scif->SCLSR), 0, SCIFn_SCLSR_ORER_SHIFT, SCIFn_SCLSR_ORER);
 
-    /* ---- Serial control register (SCSCR2) setting ---- */
+    /* ---- Serial control register (SCSCR) setting ---- */
     /* B'00 : Internal CLK */
-    RZA_IO_RegWrite_16(&SCIF2.SCSCR, 0, SCIF2_SCSCR_CKE_SHIFT, SCIF2_SCSCR_CKE);
+    RZA_IO_RegWrite_16(&(scif->SCSCR), 0, SCIFn_SCSCR_CKE_SHIFT, SCIFn_SCSCR_CKE);
 
-    /* ---- Serial mode register (SCSMR2) setting ----
+    /* ---- Serial mode register (SCSMR) setting ----
     b7    C/A  - Communication mode : Asynchronous mode
     b6    CHR  - Character length   : 8-bit data
     b5    PE   - Parity enable      : Add and check are disabled
     b3    STOP - Stop bit length    : 1 stop bit
     b1:b0 CKS  - Clock select       : cks(argument) */
-    SCIF2.SCSMR = cks & 0x0003u;
+    scif->SCSMR = cks & 0x0003u;
 
-    /* ---- Serial extension mode register (SCEMR2) setting ---- 
+    /* ---- Serial extension mode register (SCEMR) setting ---- 
     b7 BGDM - Baud rate generator double-speed mode  : Normal mode
     b0 ABCS - Base clock select in asynchronous mode : Base clock is 16 times the bit rate */
-    SCIF2.SCEMR = 0x0000u;
+    scif->SCEMR = 0x0000u;
 
-    /* ---- Bit rate register (SCBRR2) setting ---- */
-    SCIF2.SCBRR = scbrr;
+    /* ---- Bit rate register (SCBRR) setting ---- */
+    scif->SCBRR = scbrr;
 
-    /* ---- FIFO control register (SCFCR2) setting ---- */
+    /* ---- FIFO control register (SCFCR) setting ---- */
     if (SCIF_UART_MODE_RW == mode)
     {
         /* b10:b8 RSTRG - RTS output active trigger         : Initial value
@@ -150,7 +143,7 @@ void Userdef_SCIF2_UART_Init(uint8_t mode, uint16_t cks, uint8_t scbrr)
            b2     TFRST - Transmit FIFO data register reset : Disabled
            b1     RFRST - Receive FIFO data register reset  : Disabled
            b0     LOOP  - Loop-back test                    : Disabled */
-        SCIF2.SCFCR = 0x0030u;
+        scif->SCFCR = 0x0030u;
     }
     else
     {
@@ -163,7 +156,7 @@ void Userdef_SCIF2_UART_Init(uint8_t mode, uint16_t cks, uint8_t scbrr)
                b2     TFRST - Transmit FIFO data register reset : Disabled
                b1     RFRST - Receive FIFO data register reset  : Enabled
                b0     LOOP  - Loop-back test                    : Disabled */
-            SCIF2.SCFCR = 0x0032u;
+            scif->SCFCR = 0x0032u;
         }
         else if (SCIF_UART_MODE_R == (mode & SCIF_UART_MODE_R))  /* Use receive */
         {
@@ -174,7 +167,7 @@ void Userdef_SCIF2_UART_Init(uint8_t mode, uint16_t cks, uint8_t scbrr)
                b2     TFRST - Transmit FIFO data register reset : Enabled
                b1     RFRST - Receive FIFO data register reset  : Disabled
                b0     LOOP  - Loop-back test                    : Disabled */
-            SCIF2.SCFCR = 0x0034u;
+            scif->SCFCR = 0x0034u;
         }
         else
         {
@@ -185,18 +178,57 @@ void Userdef_SCIF2_UART_Init(uint8_t mode, uint16_t cks, uint8_t scbrr)
                b2     TFRST - Transmit FIFO data register reset : Enabled
                b1     RFRST - Receive FIFO data register reset  : Enabled
                b0     LOOP  - Loop-back test                    : Disabled */
-            SCIF2.SCFCR = 0x0036u;
+            scif->SCFCR = 0x0036u;
         }
     }
 
-    /* ---- Serial port register (SCSPTR2) setting ---- 
+    /* ---- Serial port register (SCSPTR) setting ---- 
     b1 SPB2IO - Serial port break output : Enabled
     b0 SPB2DT - Serial port break data   : High-level */
-    SCIF2.SCSPTR |= 0x0003u;
+    scif->SCSPTR |= 0x0003u;
 
     R_UNUSED(dummy_buf);
 }
 
+void Userdef_SCIF0_UART_Init(uint8_t mode, uint16_t cks, uint8_t scbrr)
+{
+    GenericUARTInit(DEVDRV_CH_0, mode, cks, scbrr);
+}
+
+void Userdef_SCIF1_UART_Init(uint8_t mode, uint16_t cks, uint8_t scbrr)
+{
+    GenericUARTInit(DEVDRV_CH_1, mode, cks, scbrr);
+}
+
+void Userdef_SCIF2_UART_Init(uint8_t mode, uint16_t cks, uint8_t scbrr)
+{
+    GenericUARTInit(DEVDRV_CH_2, mode, cks, scbrr);
+}
+
+void Userdef_SCIF3_UART_Init(uint8_t mode, uint16_t cks, uint8_t scbrr)
+{
+    GenericUARTInit(DEVDRV_CH_3, mode, cks, scbrr);
+}
+
+void Userdef_SCIF4_UART_Init(uint8_t mode, uint16_t cks, uint8_t scbrr)
+{
+    GenericUARTInit(DEVDRV_CH_4, mode, cks, scbrr);
+}
+
+void Userdef_SCIF5_UART_Init(uint8_t mode, uint16_t cks, uint8_t scbrr)
+{
+    GenericUARTInit(DEVDRV_CH_5, mode, cks, scbrr);
+}
+
+void Userdef_SCIF6_UART_Init(uint8_t mode, uint16_t cks, uint8_t scbrr)
+{
+    GenericUARTInit(DEVDRV_CH_6, mode, cks, scbrr);
+}
+
+void Userdef_SCIF7_UART_Init(uint8_t mode, uint16_t cks, uint8_t scbrr)
+{
+    GenericUARTInit(DEVDRV_CH_7, mode, cks, scbrr);
+}
 
 /* End of File */
 

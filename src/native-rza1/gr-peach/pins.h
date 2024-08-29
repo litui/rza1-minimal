@@ -10,7 +10,16 @@
 #define R_LED4_PORT 6
 #define R_LED4_PIN  15
 
-/* Micro-SD Card [SPI2] */
+/* I2C */
+#define R_I2C_CHANNEL  1
+#define R_I2C_SDA_PORT 1
+#define R_I2C_SDA_PIN  3
+#define R_I2C_SDA_MUX  1
+#define R_I2C_SCL_PORT 1
+#define R_I2C_SCL_PIN  2
+#define R_I2C_SCL_MUX  1
+
+/* Micro-SD Card (SPI2) */
 /* Note that these pins do not map to the RZA1 SD Host interface; just SPI2 */
 #define R_SDCARD_SPI_CHANNEL 2
 #define R_SDCARD_CLK_PORT  8  /* SCK */
@@ -28,5 +37,25 @@
 #define R_SDCARD_CD_PORT   7
 #define R_SDCARD_CD_PIN    8
 #define R_SDCARD_CD_MUX    0
+
+/* Main Serial (UART0, pins D0 and D1) */
+#define R_SERIAL_UART    0
+#define R_SERIAL_RX_PORT 2
+#define R_SERIAL_RX_PIN  15
+#define R_SERIAL_RX_MUX  6
+#define R_SERIAL_TX_PORT 2
+#define R_SERIAL_TX_PIN  14
+#define R_SERIAL_TX_MUX  6
+
+/* USB Serial (UART2) */
+#define R_USB_SERIAL_UART    2
+#define R_USB_SERIAL_RX_PORT 6
+#define R_USB_SERIAL_RX_PIN  2
+#define R_USB_SERIAL_RX_MUX  7
+#define R_USB_SERIAL_TX_PORT 6
+#define R_USB_SERIAL_TX_PIN  3
+#define R_USB_SERIAL_TX_MUX  7
+
+/* ESP32 Interface not included on GR-PEACH */
 
 #endif /* NATIVE_RZA1_PINS_H */

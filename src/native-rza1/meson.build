@@ -27,6 +27,7 @@ native_rza1_generic_sources = files(
     'common/src/common_settings/l2_cache_init.c',
     'common/src/common_settings/resetprg.c', # Contains SystemInit
     'common/src/common_settings/rza_io_regrw.c',
+    'common/src/common_settings/siorw.c',
     'common/src/drivers/bsc/bsc_driver/bsc.c',
     'common/src/drivers/bsc/userdef/bsc_userdef.c',
     'common/src/drivers/intc/intc_driver/intc.c',
@@ -39,6 +40,8 @@ native_rza1_generic_sources = files(
     'common/src/drivers/rspi/rspi_driver/rspi.c',
     'common/src/drivers/rspi/userdef/rspi_userdef.c',
     'common/src/sections.c',
+    'common/src/siochar.c',
+    'common/src/syscalls.c',
     'gpio.c',
 )
 
@@ -46,14 +49,12 @@ native_rza1_gr_peach_sources = files(
     'gr-peach/peripheral_init_basic.c',
     'gr-peach/port_init.c',
     'gr-peach/stb_init.c',
-    'gr-peach/siochar.c',
 )
 
 native_rza1_gr_lychee_sources = files(
     'gr-peach/peripheral_init_basic.c',
     'gr-peach/port_init.c',
     'gr-peach/stb_init.c',
-    'gr-peach/siochar.c',
 )
 
 native_rza1_args = [
@@ -81,10 +82,8 @@ endif
 
 native_rza1_link_args = [
     '-mthumb',
-    '-lc',
-    '-lrdimon',
     '-nostartfiles',
-    '--specs=rdimon.specs',
+    '--specs=nano.specs',
     '--entry=start',
 	'-L@0@'.format(meson.current_source_dir()),
 	'-T@0@'.format(native_rza1_linker_file),

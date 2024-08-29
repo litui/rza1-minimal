@@ -6,17 +6,15 @@
 #include "main.h"
 #include "gpio.h"
 #include "unused.h"
-
-#if defined(BOARD_GR_LYCHEE)
-#include "gr-lychee/pins.h"
-#else
-#include "gr-peach/pins.h"
-#endif
+#include "board.h"
+#include "sio_char.h"
 
 #define MAIN_LED_ON     (1)
 #define MAIN_LED_OFF    (0)
 
 static bool main_led_flg = false;      /* LED lighting/turning off */
+
+extern int     _write(int, char *, int);
 
 void SystemInit(void);
 
@@ -32,28 +30,39 @@ int main(void)
 
     SystemInit();
 
+    printf("\n\nRZA1-Minimal");
+#if defined(BOARD_GR_PEACH)
+    printf(" (GR-PEACH)\n");
+#else
+    printf(" (GR-LYCHEE)\n");
+#endif
+    printf("Completed System Init\n\n");
+
     /* Turn off LED1 since SystemInit has concluded. */
     clear_gpio(R_LED1_PORT, R_LED1_PIN);
     
     main_led_flg = MAIN_LED_OFF;    /* Initialize LED on/off flag */
+
+    printf("Initializing OS Timer (channel 0)\n");
     /* ==== Initialize OS timer (channel 0) ==== */
     R_OSTM_Init(DEVDRV_CH_0, OSTM_MODE_INTERVAL, 500);
-
     /* ==== Start OS timer (channel 0) ==== */
     R_OSTM_Open(DEVDRV_CH_0);
 
     /* Initialize SDCard-related GPIO */
-    init_gpio_as_alt(R_SDCARD_CLK_PORT, R_SDCARD_CLK_PIN, R_SDCARD_CLK_MUX);
-    init_gpio_as_alt(R_SDCARD_CMD_PORT, R_SDCARD_CMD_PIN, R_SDCARD_CMD_MUX);
-    init_gpio_as_alt(R_SDCARD_DAT0_PORT, R_SDCARD_DAT0_PIN, R_SDCARD_DAT0_MUX);
-    init_gpio_as_alt(R_SDCARD_DAT3_PORT, R_SDCARD_DAT3_PIN, R_SDCARD_DAT3_MUX);
-    init_gpio_as_output(R_SDCARD_CD_PORT, R_SDCARD_CD_PIN);
+    // init_gpio_as_alt(R_SDCARD_CLK_PORT, R_SDCARD_CLK_PIN, R_SDCARD_CLK_MUX, false);
+    // init_gpio_as_alt(R_SDCARD_CMD_PORT, R_SDCARD_CMD_PIN, R_SDCARD_CMD_MUX, false);
+    // init_gpio_as_alt(R_SDCARD_DAT0_PORT, R_SDCARD_DAT0_PIN, R_SDCARD_DAT0_MUX, false);
+    // init_gpio_as_alt(R_SDCARD_DAT3_PORT, R_SDCARD_DAT3_PIN, R_SDCARD_DAT3_MUX, false);
+    // init_gpio_as_output(R_SDCARD_CD_PORT, R_SDCARD_CD_PIN);
 
+    printf("Initializing SDCard SPI Bus\n");
     R_RSPI_Init(R_SDCARD_SPI_CHANNEL);
 
     /* Turn on LED2 to prove main function has reached its end. */
     set_gpio(R_LED2_PORT, R_LED2_PIN);
 
+    printf("\nReached end of main function.\n");
     return 0;
 }
 

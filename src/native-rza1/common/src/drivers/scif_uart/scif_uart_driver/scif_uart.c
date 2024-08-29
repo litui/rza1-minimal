@@ -45,7 +45,11 @@ Typedef definitions
 Macro definitions
 ******************************************************************************/
 /* ==== UART H/W specification ==== */
+#if defined(BOARD_GR_PEACH)
 #define SCIF_UART_CH_TOTAL      (8)     /* The number of UART channels */
+#else
+#define SCIF_UART_CH_TOTAL      (5)
+#endif
 
 /******************************************************************************
 Imported global variables and functions (from other files)
@@ -103,9 +107,30 @@ int32_t R_SCIF_UART_Init(uint32_t channel, uint32_t mode, uint16_t cks, uint8_t 
     /* ===== UART initialization ===== */
     switch (channel)
     {
+        case DEVDRV_CH_0:
+            Userdef_SCIF0_UART_Init(mode, cks, scbrr);
+            break;
+        case DEVDRV_CH_1:
+            Userdef_SCIF1_UART_Init(mode, cks, scbrr);
+            break;
         case DEVDRV_CH_2:
             Userdef_SCIF2_UART_Init(mode, cks, scbrr);
-        break;
+            break;
+        case DEVDRV_CH_3:
+            Userdef_SCIF3_UART_Init(mode, cks, scbrr);
+            break;
+        case DEVDRV_CH_4:
+            Userdef_SCIF4_UART_Init(mode, cks, scbrr);
+            break;
+        case DEVDRV_CH_5:
+            Userdef_SCIF5_UART_Init(mode, cks, scbrr);
+            break;
+        case DEVDRV_CH_6:
+            Userdef_SCIF6_UART_Init(mode, cks, scbrr);
+            break;
+        case DEVDRV_CH_7:
+            Userdef_SCIF7_UART_Init(mode, cks, scbrr);
+            break;
         default:
             /* Do Nothing */
         break;
@@ -114,6 +139,43 @@ int32_t R_SCIF_UART_Init(uint32_t channel, uint32_t mode, uint16_t cks, uint8_t 
     return DEVDRV_SUCCESS;
 }
 
+volatile struct st_scif * SCIF_GetRegAddr(uint32_t channel)
+{
+    volatile struct st_scif * scif;
 
+    switch (channel)
+    {
+        case DEVDRV_CH_0:
+            scif = &SCIF0;
+            break;
+        case DEVDRV_CH_1:
+            scif = &SCIF1;
+            break;
+        case DEVDRV_CH_2:
+            scif = &SCIF2;
+            break;
+        case DEVDRV_CH_3:
+            scif = &SCIF3;
+            break;
+        case DEVDRV_CH_4:
+            scif = &SCIF4;
+            break;
+        case DEVDRV_CH_5:
+            scif = &SCIF5;
+            break;
+        case DEVDRV_CH_6:
+            scif = &SCIF6;
+            break;
+        case DEVDRV_CH_7:
+            scif = &SCIF7;
+            break;
+        default:
+            /* Do not reach here based on the assumption */
+            scif = &SCIF0;
+        break;
+    }
+
+    return scif;
+}
 /* End of File */
 

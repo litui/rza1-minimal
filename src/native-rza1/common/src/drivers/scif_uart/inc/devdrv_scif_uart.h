@@ -66,7 +66,16 @@ Functions Prototypes
 int32_t R_SCIF_UART_Init(uint32_t channel, uint32_t mode, uint16_t cks, uint8_t scbrr);
 
 /* ==== User-defined function ==== */
+void Userdef_SCIF0_UART_Init(uint8_t mode, uint16_t cks, uint8_t scbrr);
+void Userdef_SCIF1_UART_Init(uint8_t mode, uint16_t cks, uint8_t scbrr);
 void Userdef_SCIF2_UART_Init(uint8_t mode, uint16_t cks, uint8_t scbrr);
+void Userdef_SCIF3_UART_Init(uint8_t mode, uint16_t cks, uint8_t scbrr);
+void Userdef_SCIF4_UART_Init(uint8_t mode, uint16_t cks, uint8_t scbrr);
+void Userdef_SCIF5_UART_Init(uint8_t mode, uint16_t cks, uint8_t scbrr);
+void Userdef_SCIF6_UART_Init(uint8_t mode, uint16_t cks, uint8_t scbrr);
+void Userdef_SCIF7_UART_Init(uint8_t mode, uint16_t cks, uint8_t scbrr);
+
+volatile struct st_scif * SCIF_GetRegAddr(uint32_t channel);
 
 
 #endif  /* DEVDRV_SCIF_UART_H */

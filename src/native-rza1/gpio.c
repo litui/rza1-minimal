@@ -23,7 +23,17 @@ uint16_t gpio_reg_get(volatile uint16_t *reg, uint8_t port, uint8_t pin) {
       (uint16_t)1 << pin);
 }
 
-void init_gpio_as_alt(uint8_t port, uint8_t pin, uint8_t mux) {
+void init_gpio_as_alt(uint8_t port, uint8_t pin, uint8_t mux, bool bidirectional) {
+  
+  /* Clean init of port before mux settings */
+  gpio_reg_set(&GPIO.PIBC1, port, pin, 0);
+  gpio_reg_set(&GPIO.PBDC1, port, pin, 0);
+  gpio_reg_set(&GPIO.PM1, port, pin, 1);
+  gpio_reg_set(&GPIO.PMC1, port, pin, 0);
+  gpio_reg_set(&GPIO.PIPC1, port, pin, 0);
+
+  /* Mux settings for alternate function */
+  gpio_reg_set(&GPIO.PBDC1, port, pin, bidirectional ? 1 : 0);
   gpio_reg_set(&GPIO.PFCAE1, port, pin, mux >= 5);
   gpio_reg_set(&GPIO.PFCE1, port, pin, ((mux - 1) >> 1) & 1);
   gpio_reg_set(&GPIO.PFC1, port, pin, (mux - 1) & 1);

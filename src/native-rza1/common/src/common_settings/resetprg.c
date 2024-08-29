@@ -133,6 +133,8 @@ void SystemInit(void)
     __enable_irq();         /* Enable IRQ interrupt */
     __enable_fiq();         /* Enable FIQ interrupt */
 
+    IoInitScif();
+
 #ifdef __CC_ARM
     /* ==== Function call of main function ==== */
     $Super$$main();

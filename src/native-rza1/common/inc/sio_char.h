@@ -32,7 +32,7 @@
 /******************************************************************************
 Includes   <System Includes> , "Project Includes"
 ******************************************************************************/
-
+#include "r_typedefs.h"
 
 /******************************************************************************
 Typedef definitions
@@ -55,7 +55,7 @@ Functions Prototypes
 int32_t SioWrite(int32_t file_no, const int_t * buffer, uint32_t writing_b);
 int32_t SioRead(int32_t file_no, int_t * buffer, uint32_t reading_b);
 
-void    IoInitScif2(void);
+void    IoInitScif(void);
 int_t   IoGetchar(void);
 void    IoPutchar(int_t buffer);
 

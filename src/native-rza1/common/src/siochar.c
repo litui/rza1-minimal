@@ -37,6 +37,8 @@ Includes   <System Includes> , "Project Includes"
 #include "sio_char.h"
 #include "iodefine.h"
 #include "rza_io_regrw.h"
+#include "board.h"
+#include "gpio.h"
 
 /******************************************************************************
 Typedef definitions
@@ -64,75 +66,44 @@ Private global variables and functions
 
 
 /******************************************************************************
-* Function Name: IoInitScif2
-* Description  : This function initializes SCIF channel 2 as UART mode.
-*              : The transmit and the receive of SCIF channel 2 are enabled.
+* Function Name: IoInitScif
+* Description  : This function initializes SCIF in UART mode.
+*              : The transmit and the receive of SCIF channel are enabled.
 * Arguments    : none
 * Return Value : none
 ******************************************************************************/
-void IoInitScif2(void)
+void IoInitScif(void)
 {
+    devdrv_ch_t channel = R_SERIAL_UART;
+    volatile struct st_scif * scif = SCIF_GetRegAddr(channel);
+
     /* === Initialization of SCIF2 ==== */
     /* P1 clock=66.67MHz CKS=0 SCBRR=17 Bit rate error=0.46% => Baud rate=115200bps */
-    R_SCIF_UART_Init(DEVDRV_CH_2, SCIF_UART_MODE_RW, SCIF_CKS_DIVISION_1, 17);
+    R_SCIF_UART_Init(channel, SCIF_UART_MODE_RW, SCIF_CKS_DIVISION_1, 17);
 
-    /* === Initialization of PORT function ==== */
-    /* ---- P3_0 : TxD2 ---- */
-    /* Port initialize */
-    RZA_IO_RegWrite_16(&GPIO.PIBC3,  0, GPIO_PIBC3_PIBC30_SHIFT,   GPIO_PIBC3_PIBC30);
-    RZA_IO_RegWrite_16(&GPIO.PBDC3,  0, GPIO_PBDC3_PBDC30_SHIFT,   GPIO_PBDC3_PBDC30);
-    RZA_IO_RegWrite_16(&GPIO.PM3,    1, GPIO_PM3_PM30_SHIFT,       GPIO_PM3_PM30);
-    RZA_IO_RegWrite_16(&GPIO.PMC3,   0, GPIO_PMC3_PMC30_SHIFT,     GPIO_PMC3_PMC30);
-    RZA_IO_RegWrite_16(&GPIO.PIPC3,  0, GPIO_PIPC3_PIPC30_SHIFT,   GPIO_PIPC3_PIPC30);
-    /* Port mode : Multiplex mode                     */
-    /* Port function setting : 6th multiplex function */
-    /* I/O control mode : Peripheral function         */
-    /* Bidirectional mode : Disable                   */
-    RZA_IO_RegWrite_16(&GPIO.PBDC3,  0, GPIO_PBDC3_PBDC30_SHIFT,   GPIO_PBDC3_PBDC30);
-    RZA_IO_RegWrite_16(&GPIO.PFC3,   1, GPIO_PFC3_PFC30_SHIFT,     GPIO_PFC3_PFC30);
-    RZA_IO_RegWrite_16(&GPIO.PFCE3,  0, GPIO_PFCE3_PFCE30_SHIFT,   GPIO_PFCE3_PFCE30);
-    RZA_IO_RegWrite_16(&GPIO.PFCAE3, 1, GPIO_PFCAE3_PFCAE30_SHIFT, GPIO_PFCAE3_PFCAE30);
-    RZA_IO_RegWrite_16(&GPIO.PIPC3,  1, GPIO_PIPC3_PIPC30_SHIFT,   GPIO_PIPC3_PIPC30);
-    RZA_IO_RegWrite_16(&GPIO.PMC3,   1, GPIO_PMC3_PMC30_SHIFT,     GPIO_PMC3_PMC30);
+    init_gpio_as_alt(R_SERIAL_TX_PORT, R_SERIAL_TX_PIN, R_SERIAL_TX_MUX, false);
+    init_gpio_as_alt(R_SERIAL_RX_PORT, R_SERIAL_RX_PIN, R_SERIAL_RX_MUX, true);
 
-    /* ---- P3_2 : RxD2 ---- */
-    /* Port initialize */
-    RZA_IO_RegWrite_16(&GPIO.PIBC3,  0, GPIO_PIBC3_PIBC32_SHIFT,   GPIO_PIBC3_PIBC32);
-    RZA_IO_RegWrite_16(&GPIO.PBDC3,  0, GPIO_PBDC3_PBDC32_SHIFT,   GPIO_PBDC3_PBDC32);
-    RZA_IO_RegWrite_16(&GPIO.PM3,    1, GPIO_PM3_PM32_SHIFT,       GPIO_PM3_PM32);
-    RZA_IO_RegWrite_16(&GPIO.PMC3,   0, GPIO_PMC3_PMC32_SHIFT,     GPIO_PMC3_PMC32);
-    RZA_IO_RegWrite_16(&GPIO.PIPC3,  0, GPIO_PIPC3_PIPC32_SHIFT,   GPIO_PIPC3_PIPC32);
-    /* Port mode : Multiplex mode                     */
-    /* Port function setting : 4th multiplex function */
-    /* I/O control mode : Peripheral function         */
-    /* Bidirectional mode : Enable                    */
-    RZA_IO_RegWrite_16(&GPIO.PBDC3,  1, GPIO_PBDC3_PBDC32_SHIFT,   GPIO_PBDC3_PBDC32);
-    RZA_IO_RegWrite_16(&GPIO.PFC3,   1, GPIO_PFC3_PFC32_SHIFT,     GPIO_PFC3_PFC32);
-    RZA_IO_RegWrite_16(&GPIO.PFCE3,  1, GPIO_PFCE3_PFCE32_SHIFT,   GPIO_PFCE3_PFCE32);
-    RZA_IO_RegWrite_16(&GPIO.PFCAE3, 0, GPIO_PFCAE3_PFCAE32_SHIFT, GPIO_PFCAE3_PFCAE32);
-    RZA_IO_RegWrite_16(&GPIO.PIPC3,  1, GPIO_PIPC3_PIPC32_SHIFT,   GPIO_PIPC3_PIPC32);
-    RZA_IO_RegWrite_16(&GPIO.PMC3,   1, GPIO_PMC3_PMC32_SHIFT,     GPIO_PMC3_PMC32);
-
-    /* === Enable SCIF2 transmission/reception ==== */
-    /* ---- Serial control register (SCSCRi) setting ---- */
-    SCIF2.SCSCR = 0x0030u;
-                            /* SCIF2 transmitting and receiving operations are enabled */
+    /* === Enable SCIF transmission/reception ==== */
+    scif->SCSCR = 0x0030u;
 }
 
 /******************************************************************************
 * Function Name: IoGetchar
-* Description  : One character is received from SCIF2, and it's data is returned.
+* Description  : One character is received from SCIF, and it's data is returned.
 *              : This function keeps waiting until it can obtain the receiving data.
 * Arguments    : none
 * Return Value : Character to receive (Byte).
 ******************************************************************************/
 int_t IoGetchar(void)
 {
+    volatile struct st_scif * scif = SCIF_GetRegAddr(R_SERIAL_UART);
+
     int_t data;
 
     /* Confirming receive error(ER,BRK,FER,PER,ORER) */
-    if (((SCIF2.SCFSR & 0x09Cu) != 0) ||
-        (1 == RZA_IO_RegRead_16(&SCIF2.SCLSR, SCIF2_SCLSR_ORER_SHIFT, SCIF2_SCLSR_ORER)))
+    if (((scif->SCFSR & 0x09Cu) != 0) ||
+        (1 == RZA_IO_RegRead_16(&(scif->SCLSR), SCIFn_SCLSR_ORER_SHIFT, SCIFn_SCLSR_ORER)))
     {
         /* ---- Detect receive error ---- */
         /* Disable reception             */
@@ -140,27 +111,27 @@ int_t IoGetchar(void)
         /* Clearing FIFO reception reset */
         /* Error bit clear               */
         /* Enable reception              */
-        RZA_IO_RegWrite_16(&SCIF2.SCSCR, 0, SCIF2_SCSCR_RE_SHIFT,    SCIF2_SCSCR_RE);
-        RZA_IO_RegWrite_16(&SCIF2.SCFCR, 1, SCIF2_SCFCR_RFRST_SHIFT, SCIF2_SCFCR_RFRST);
-        RZA_IO_RegWrite_16(&SCIF2.SCFCR, 0, SCIF2_SCFCR_RFRST_SHIFT, SCIF2_SCFCR_RFRST);
-        SCIF2.SCFSR &= ~0x9Cu;
-        RZA_IO_RegWrite_16(&SCIF2.SCLSR, 0, SCIF2_SCLSR_ORER_SHIFT,  SCIF2_SCLSR_ORER);
-        RZA_IO_RegWrite_16(&SCIF2.SCSCR, 1, SCIF2_SCSCR_RE_SHIFT,    SCIF2_SCSCR_RE);
+        RZA_IO_RegWrite_16(&(scif->SCSCR), 0, SCIFn_SCSCR_RE_SHIFT,    SCIFn_SCSCR_RE);
+        RZA_IO_RegWrite_16(&(scif->SCFCR), 1, SCIFn_SCFCR_RFRST_SHIFT, SCIFn_SCFCR_RFRST);
+        RZA_IO_RegWrite_16(&(scif->SCFCR), 0, SCIFn_SCFCR_RFRST_SHIFT, SCIFn_SCFCR_RFRST);
+        scif->SCFSR &= ~0x9Cu;
+        RZA_IO_RegWrite_16(&(scif->SCLSR), 0, SCIFn_SCLSR_ORER_SHIFT,  SCIFn_SCLSR_ORER);
+        RZA_IO_RegWrite_16(&(scif->SCSCR), 1, SCIFn_SCSCR_RE_SHIFT,    SCIFn_SCSCR_RE);
 
         return -1;
     }
 
     /* Is there receive FIFO data? */
-    while (0 == RZA_IO_RegRead_16(&SCIF2.SCFSR, SCIF2_SCFSR_RDF_SHIFT, SCIF2_SCFSR_RDF))
+    while (0 == RZA_IO_RegRead_16(&(scif->SCFSR), SCIFn_SCFSR_RDF_SHIFT, SCIFn_SCFSR_RDF))
     {
         /* WAIT */
     }
 
     /* Read receive data */
-    data = (int_t)(SCIF2.SCFRDR & 0xFFu);
+    data = (int_t)(scif->SCFRDR & 0xFFu);
     /* Clear DR,RDF */
-    RZA_IO_RegWrite_16(&SCIF2.SCFSR, 0, SCIF2_SCFSR_DR_SHIFT, SCIF2_SCFSR_DR);
-    RZA_IO_RegWrite_16(&SCIF2.SCFSR, 0, SCIF2_SCFSR_RDF_SHIFT, SCIF2_SCFSR_RDF);
+    RZA_IO_RegWrite_16(&(scif->SCFSR), 0, SCIFn_SCFSR_DR_SHIFT, SCIFn_SCFSR_DR);
+    RZA_IO_RegWrite_16(&(scif->SCFSR), 0, SCIFn_SCFSR_RDF_SHIFT, SCIFn_SCFSR_RDF);
 
     return data;
 }
@@ -175,17 +146,19 @@ int_t IoGetchar(void)
 ******************************************************************************/
 void IoPutchar(int_t buffer)
 {
+    volatile struct st_scif * scif = SCIF_GetRegAddr(R_SERIAL_UART);
+
     /* Check if it is possible to transmit (TDFE flag) */
-    while (0 == RZA_IO_RegRead_16(&SCIF2.SCFSR, SCIF2_SCFSR_TDFE_SHIFT, SCIF2_SCFSR_TDFE))
+    while (0 == RZA_IO_RegRead_16(&(scif->SCFSR), SCIFn_SCFSR_TDFE_SHIFT, SCIFn_SCFSR_TDFE))
     {
         /* Wait */
     }
 
     /* Write the receiving data in TDR */
-    SCIF2.SCFTDR = (uint8_t)buffer;
+    scif->SCFTDR = (uint8_t)buffer;
 
     /* Clear TDRE and TEND flag */
-    SCIF2.SCFSR &= ~0x0060u;
+    scif->SCFSR &= ~0x0060u;
 }
 
 
