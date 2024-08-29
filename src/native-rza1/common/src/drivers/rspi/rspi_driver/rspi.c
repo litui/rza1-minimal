@@ -36,6 +36,7 @@ Includes   <System Includes> , "Project Includes"
 #include "devdrv_rspi.h"            /* RSPI Driver header */
 #include "iodefine.h"
 #include "rza_io_regrw.h"
+#include "unused.h"
 
 /******************************************************************************
 Typedef definitions
@@ -992,6 +993,10 @@ static int32_t RSPI_Transmit(uint32_t channel, void * buffer, uint32_t count, ui
         /* Restore TXTRG */
         RZA_IO_RegWrite_8(&(rspi->SPBFCR), txtrg_backup, RSPIn_SPBFCR_TXTRG_SHIFT, RSPIn_SPBFCR_TXTRG);
     }
+
+    R_UNUSED(dummy_buffer_8);
+    R_UNUSED(dummy_buffer_16);
+    R_UNUSED(dummy_buffer_32);
 
     return ret;
 }
