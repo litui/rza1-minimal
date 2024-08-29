@@ -2,8 +2,6 @@
 
 Based on the `RZ_A1H_other_sample` code from Renesas, this repo aims to be a starting point for developers looking to write code for the [GR-LYCHEE](https://os.mbed.com/platforms/Renesas-GR-LYCHEE/) or [GR-PEACH](https://os.mbed.com/platforms/Renesas-GR-PEACH/) without the need to rely on Renesas's e2studio IDE or the IDE4GR. Unlike most of the RZA example code from Renesas and ARM/MBED, this code is not bound to FreeRTOS or MbedOS but is somewhat barebones and has been adapted to run successfully from SFLASH (`0x18000000`) on the GR-PEACH and GR-LYCHEE which are locked to boot mode 3 and boot mode 1, respectively.
 
-While it's not all linked, most of the Renesas Sample code was left intact in the repo and will be adapted or cleared out over time.
-
 This repository is not affiliated with or endorsed by Renesas. Copyrights belong to their respective holders and licenses contained in individual files supercede any overall license for this repository.
 
 ## Done
