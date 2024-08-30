@@ -5,6 +5,7 @@
 #include "devdrv_rspi.h"
 #include "main.h"
 #include "gpio.h"
+#include "sdcard.h"
 #include "unused.h"
 #include "board.h"
 
@@ -46,15 +47,7 @@ int main(void)
     /* ==== Start OS timer (channel 0) ==== */
     R_OSTM_Open(DEVDRV_CH_0);
 
-    /* Initialize SDCard-related GPIO */
-    // init_gpio_as_alt(R_SDCARD_CLK_PORT, R_SDCARD_CLK_PIN, R_SDCARD_CLK_MUX, false);
-    // init_gpio_as_alt(R_SDCARD_CMD_PORT, R_SDCARD_CMD_PIN, R_SDCARD_CMD_MUX, false);
-    // init_gpio_as_alt(R_SDCARD_DAT0_PORT, R_SDCARD_DAT0_PIN, R_SDCARD_DAT0_MUX, false);
-    // init_gpio_as_alt(R_SDCARD_DAT3_PORT, R_SDCARD_DAT3_PIN, R_SDCARD_DAT3_MUX, false);
-    // init_gpio_as_output(R_SDCARD_CD_PORT, R_SDCARD_CD_PIN);
-
-    printf("Initializing SDCard SPI Bus\n");
-    R_RSPI_Init(R_SDCARD_SPI_CHANNEL);
+    sdcard_init();
 
     /* Turn on LED2 to prove main function has reached its end. */
     set_gpio(R_LED2_PORT, R_LED2_PIN);

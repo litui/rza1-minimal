@@ -54,6 +54,7 @@ Macro definitions
 /* Peripheral clock1 (P1 clock) : 66.67MHz, Peripheral clock0 (P0 clock) : 33.33MHz */
 /* Setting to operate the bit rate at the speed of 2.78Mbps (=(P1 clock)/24)        */
 /* with the condition above                                                         */
+/* This relationship is clarified in RZ/A1LU manual table 16.3 on p701 */
 #define RSPI_SPR            (5u)         /* Setting value of the SPBR register */
 #define RSPI_BRDV           (1u)         /* Setting value of the BRDV bit of   */
                                          /* the SPCMD0 register                */
@@ -95,17 +96,6 @@ static volatile uint8_t rspi3_receive_full_flg;
 static volatile uint8_t rspi3_transmit_empty_flg;
 static volatile uint8_t rspi4_receive_full_flg;
 static volatile uint8_t rspi4_transmit_empty_flg;
-
-uint8_t *rspi0_trans_data;
-uint8_t *rspi0_receive_data;
-uint8_t *rspi1_trans_data;
-uint8_t *rspi1_receive_data;
-uint8_t *rspi2_trans_data;
-uint8_t *rspi2_receive_data;
-uint8_t *rspi3_trans_data;
-uint8_t *rspi3_receive_data;
-uint8_t *rspi4_trans_data;
-uint8_t *rspi4_receive_data;
 
 static void GenericSetTransmitEmpty(devdrv_ch_t channel);
 static void GenericWaitTransmitEmpty(devdrv_ch_t channel);
@@ -286,10 +276,6 @@ static void GenericSPIInit(devdrv_ch_t channel)
         R_INTC_SetPriority(INTC_ID_SPTI0, 10);  /* SPTIn interrupt priority= 10 is specified */
         R_INTC_Enable(INTC_ID_SPRI0);   /* SPRIn interrupt enabled */
         R_INTC_Enable(INTC_ID_SPTI0);   /* SPTIn interrupt enabled */
-        rspi0_trans_data = (uint8_t*) malloc(RSPI_DATA_SIZE);
-        rspi0_receive_data = (uint8_t*) malloc(RSPI_DATA_SIZE);
-        InitMemory8Bit(rspi0_trans_data, 0x00, RSPI_DATA_SIZE, 1);      /* Generate transmit data    */
-        InitMemory8Bit(rspi0_receive_data, 0x00, RSPI_DATA_SIZE, 0);    /* Clear receive data buffer */
         break;
     case DEVDRV_CH_1:
         R_INTC_RegistIntFunc(INTC_ID_SPRI1, Userdef_SPRI1_Interrupt);
@@ -298,10 +284,6 @@ static void GenericSPIInit(devdrv_ch_t channel)
         R_INTC_SetPriority(INTC_ID_SPTI1, 10);  /* SPTIn interrupt priority= 10 is specified */
         R_INTC_Enable(INTC_ID_SPRI1);   /* SPRIn interrupt enabled */
         R_INTC_Enable(INTC_ID_SPTI1);   /* SPTIn interrupt enabled */
-        rspi1_trans_data = (uint8_t*) malloc(RSPI_DATA_SIZE);
-        rspi1_receive_data = (uint8_t*) malloc(RSPI_DATA_SIZE);
-        InitMemory8Bit(rspi1_trans_data, 0x00, RSPI_DATA_SIZE, 1);      /* Generate transmit data    */
-        InitMemory8Bit(rspi1_receive_data, 0x00, RSPI_DATA_SIZE, 0);    /* Clear receive data buffer */
         break;
     case DEVDRV_CH_2:
         R_INTC_RegistIntFunc(INTC_ID_SPRI2, Userdef_SPRI2_Interrupt);
@@ -310,10 +292,6 @@ static void GenericSPIInit(devdrv_ch_t channel)
         R_INTC_SetPriority(INTC_ID_SPTI2, 10);  /* SPTIn interrupt priority= 10 is specified */
         R_INTC_Enable(INTC_ID_SPRI2);   /* SPRIn interrupt enabled */
         R_INTC_Enable(INTC_ID_SPTI2);   /* SPTIn interrupt enabled */
-        rspi2_trans_data = (uint8_t*) malloc(RSPI_DATA_SIZE);
-        rspi2_receive_data = (uint8_t*) malloc(RSPI_DATA_SIZE);
-        InitMemory8Bit(rspi2_trans_data, 0x00, RSPI_DATA_SIZE, 1);      /* Generate transmit data    */
-        InitMemory8Bit(rspi2_receive_data, 0x00, RSPI_DATA_SIZE, 0);    /* Clear receive data buffer */
         break;
     case DEVDRV_CH_3:
         R_INTC_RegistIntFunc(INTC_ID_SPRI3, Userdef_SPRI3_Interrupt);
@@ -322,10 +300,6 @@ static void GenericSPIInit(devdrv_ch_t channel)
         R_INTC_SetPriority(INTC_ID_SPTI3, 10);  /* SPTIn interrupt priority= 10 is specified */
         R_INTC_Enable(INTC_ID_SPRI3);   /* SPRIn interrupt enabled */
         R_INTC_Enable(INTC_ID_SPTI3);   /* SPTIn interrupt enabled */
-        rspi3_trans_data = (uint8_t*) malloc(RSPI_DATA_SIZE);
-        rspi3_receive_data = (uint8_t*) malloc(RSPI_DATA_SIZE);
-        InitMemory8Bit(rspi3_trans_data, 0x00, RSPI_DATA_SIZE, 1);      /* Generate transmit data    */
-        InitMemory8Bit(rspi3_receive_data, 0x00, RSPI_DATA_SIZE, 0);    /* Clear receive data buffer */
         break;
     case DEVDRV_CH_4:
         R_INTC_RegistIntFunc(INTC_ID_SPRI4, Userdef_SPRI4_Interrupt);
@@ -334,10 +308,6 @@ static void GenericSPIInit(devdrv_ch_t channel)
         R_INTC_SetPriority(INTC_ID_SPTI4, 10);  /* SPTIn interrupt priority= 10 is specified */
         R_INTC_Enable(INTC_ID_SPRI4);   /* SPRIn interrupt enabled */
         R_INTC_Enable(INTC_ID_SPTI4);   /* SPTIn interrupt enabled */
-        rspi4_trans_data = (uint8_t*) malloc(RSPI_DATA_SIZE);
-        rspi4_receive_data = (uint8_t*) malloc(RSPI_DATA_SIZE);
-        InitMemory8Bit(rspi4_trans_data, 0x00, RSPI_DATA_SIZE, 1);      /* Generate transmit data    */
-        InitMemory8Bit(rspi4_receive_data, 0x00, RSPI_DATA_SIZE, 0);    /* Clear receive data buffer */
         break;
     default:
         break;

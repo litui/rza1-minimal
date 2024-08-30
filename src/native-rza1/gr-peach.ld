@@ -192,11 +192,11 @@ SECTIONS
     } > STACK
 
     .uncached_RAM (NOLOAD) : {
-        * (BSS_RIIC_SAMPLE)                 /* RIIC sample transfer work area */
-        * (BSS_RSPI_SAMPLE)                 /* RSPI sample transfer work area */
-        * (BSS_SCIF_SYNC_SAMPLE)            /* SCIF_SYNC sample work area */
-        * (BSS_DMAC_SAMPLE_SDRAM)           /* DMAC sample transfer destination work area */
-        * (BSS_NANDNC)                      /* FLCTL work */
+/*        * (BSS_RIIC_SAMPLE)       */           /* RIIC sample transfer work area */
+        * (BSS_SDCARD_BUFFER)                  /* SDCARD transfer work area */
+/*        * (BSS_SCIF_SYNC_SAMPLE)  */           /* SCIF_SYNC sample work area */
+/*        * (BSS_DMAC_SAMPLE_SDRAM) */           /* DMAC sample transfer destination work area */
+/*        * (BSS_NANDNC)            */          /* FLCTL work */
     } > UNCACHED_RAM
 
     .uncached_RAM2 : {

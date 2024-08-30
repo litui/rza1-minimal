@@ -42,6 +42,7 @@ native_rza1_generic_sources = files(
     'common/src/sections.c',
     'common/src/siochar.c',
     'common/src/syscalls.c',
+    'sdcard.c',
     'gpio.c',
 )
 
