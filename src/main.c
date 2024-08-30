@@ -7,14 +7,11 @@
 #include "gpio.h"
 #include "unused.h"
 #include "board.h"
-#include "sio_char.h"
 
 #define MAIN_LED_ON     (1)
 #define MAIN_LED_OFF    (0)
 
 static bool main_led_flg = false;      /* LED lighting/turning off */
-
-extern int     _write(int, char *, int);
 
 void SystemInit(void);
 
